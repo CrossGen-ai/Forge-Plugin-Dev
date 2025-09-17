@@ -41,6 +41,8 @@ Each plugin maintains the following minimum structure
 		plugin.update.md                # command to use to make updates to this project
 	tests/       # all project test files
 	src/        # unique source files for plugin
+		main.ts
+		other-files....
 
 ---
 ## Project Architecture & Naming Conventions
