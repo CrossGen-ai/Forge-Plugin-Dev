@@ -68,7 +68,7 @@ if [ ! -d "$OBSIDIAN_PLUGINS_DIR" ]; then
     exit 1
 fi
 
-# Check if symlink target already exists
+# Check if plugin target already exists
 if [ -e "$SYMLINK_TARGET" ]; then
     echo "❌ Error: Plugin '$PLUGIN_NAME' already exists in .obsidian/plugins"
     echo "File/directory already exists: $SYMLINK_TARGET"
@@ -227,12 +227,12 @@ if [ $? -eq 0 ]; then
         echo "✓ Copied manifest.json"
         echo "✓ Build folder ready with all required files"
         echo ""
-        echo "🔗 Creating symlink for Obsidian..."
+        echo "📦 Copying plugin to Obsidian plugins directory..."
 
-        # Create symlink using relative path for portability (pointing to build folder)
+        # Copy build folder contents to .obsidian/plugins directory
         cd "$PROJECT_ROOT"
-        if ln -s "../../plugins/$PLUGIN_NAME/build" "$SYMLINK_TARGET" 2>/dev/null; then
-            echo "✅ Symlink created: .obsidian/plugins/$PLUGIN_NAME -> plugins/$PLUGIN_NAME/build"
+        if mkdir -p "$SYMLINK_TARGET" && cp -r "plugins/$PLUGIN_NAME/build/"* "$SYMLINK_TARGET/" 2>/dev/null; then
+            echo "✅ Plugin copied: .obsidian/plugins/$PLUGIN_NAME"
             echo ""
             echo "✅ Plugin '$PLUGIN_NAME' created and ready for use!"
             echo ""
@@ -241,17 +241,18 @@ if [ $? -eq 0 ]; then
             echo "2. npm run dev (for development with watch mode)"
             echo "3. Edit src/main.ts to implement your plugin"
             echo "4. Enable the plugin in Obsidian Settings → Community Plugins"
+            echo "5. After making changes, run: cp -r plugins/$PLUGIN_NAME/build/* .obsidian/plugins/$PLUGIN_NAME/"
             echo ""
             echo "Ready for development! The plugin has been:"
             echo "✓ Created with proper folder structure"
             echo "✓ Dependencies installed"
             echo "✓ Built successfully (build/main.js created)"
             echo "✓ All plugin files copied to build/ folder"
-            echo "✓ Symlinked to .obsidian/plugins for immediate use"
+            echo "✓ Copied to .obsidian/plugins for immediate use"
         else
-            echo "⚠️  Warning: Could not create symlink to .obsidian/plugins"
-            echo "   You can manually copy the plugin files or create the symlink:"
-            echo "   ln -s ../../plugins/$PLUGIN_NAME/build .obsidian/plugins/$PLUGIN_NAME"
+            echo "⚠️  Warning: Could not copy plugin to .obsidian/plugins"
+            echo "   You can manually copy the plugin files:"
+            echo "   mkdir -p .obsidian/plugins/$PLUGIN_NAME && cp -r plugins/$PLUGIN_NAME/build/* .obsidian/plugins/$PLUGIN_NAME/"
             echo ""
             echo "✅ Plugin '$PLUGIN_NAME' created and built successfully!"
             echo ""
@@ -259,7 +260,7 @@ if [ $? -eq 0 ]; then
             echo "1. cd plugins/$PLUGIN_NAME"
             echo "2. npm run dev (for development with watch mode)"
             echo "3. Edit src/main.ts to implement your plugin"
-            echo "4. Copy build folder to .obsidian/plugins/$PLUGIN_NAME or create symlink"
+            echo "4. Copy build folder to .obsidian/plugins/$PLUGIN_NAME"
             echo ""
             echo "Ready for development! The plugin has been:"
             echo "✓ Created with proper folder structure"
@@ -309,5 +310,5 @@ echo "- Compiled TypeScript to build/main.js"
 echo "- Copied manifest.json to build/ folder"
 echo "- Copied styles.css to build/ folder (if exists)"
 echo "- Copied versions.json to build/ folder (if exists)"
-echo "- Created symlink: .obsidian/plugins/$PLUGIN_NAME -> plugins/$PLUGIN_NAME/build"
+echo "- Copied build files to: .obsidian/plugins/$PLUGIN_NAME"
 echo ""
