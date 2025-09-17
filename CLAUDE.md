@@ -4,8 +4,11 @@ Canonical metadata for the Forge-Plugin-Dev workspace. All projects in this vaul
 
 # Principles
 Coding principles:
-1) DRY principle
-2) KISS priniple
+1) Adhere to only obsidian plugin design rules 
+2) DRY principle
+3) KISS priniple
+4) No backwards compatibly
+5) No not create fallbacks
 
 # Folders
 
