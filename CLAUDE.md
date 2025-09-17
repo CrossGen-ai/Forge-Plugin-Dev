@@ -34,13 +34,13 @@ Each plugin maintains the following minimum structure
 		plugin.ideas.md
 		plugin.lesson-learned.md
 		other....
-	agents/          # (claude code agents for plugin symlink to .claude/agents folder)
+	plugin-agents/          # (claude code agents for plugin symlink to .claude/agents folder)
 		plugin.agent-name.md     # various claude code agents for this plugin 
-	commands/          # (claude code slash commands for plugin these symlink to .claude/agents folder)
+	plugin-commands/          # (claude code slash commands for plugin these symlink to .claude/agents folder)
 		plugin.context-prime.md     # context prime for claude code using this plugin 
 		plugin.update.md                # command to use to make updates to this project
 	tests/       # all project test files
-		
+	src/        # unique source files for plugin
 
 ---
 ## Project Architecture & Naming Conventions
