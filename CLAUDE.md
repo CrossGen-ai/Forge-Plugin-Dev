@@ -20,6 +20,7 @@ Forge-Plugin-Dev/
     queue-bridge/          # file/IPC queue to Claude Code/Python, status viewer
     schema-guard/          # validates frontmatter/types; fix-it actions
     ops-tools/              # housekeeping: link rewriter, attachment mover, audits
+build-support/       # support code for building plugins in this repo (not part of the plugins)
 
 ### Obsidian Folders
 Forge-Plugin-Dev/
