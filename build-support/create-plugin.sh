@@ -229,10 +229,9 @@ if [ $? -eq 0 ]; then
         echo ""
         echo "📦 Copying plugin to Obsidian plugins directory..."
 
-        # Copy build folder contents to .obsidian/plugins directory
+        # Use the copy-plugin.sh script to copy build folder
         cd "$PROJECT_ROOT"
-        if mkdir -p "$PLUGIN_TARGET" && cp -r "plugins/$PLUGIN_NAME/build/"* "$PLUGIN_TARGET/" 2>/dev/null; then
-            echo "✅ Plugin copied: .obsidian/plugins/$PLUGIN_NAME"
+        if "$SCRIPT_DIR/copy-plugin.sh" "$PLUGIN_NAME"; then
             echo ""
             echo "✅ Plugin '$PLUGIN_NAME' created and ready for use!"
             echo ""
@@ -241,7 +240,7 @@ if [ $? -eq 0 ]; then
             echo "2. npm run dev (for development with watch mode)"
             echo "3. Edit src/main.ts to implement your plugin"
             echo "4. Enable the plugin in Obsidian Settings → Community Plugins"
-            echo "5. After making changes, run: cp -r plugins/$PLUGIN_NAME/build/* .obsidian/plugins/$PLUGIN_NAME/"
+            echo "5. After making changes, run: build-support/copy-plugin.sh $PLUGIN_NAME"
             echo ""
             echo "Ready for development! The plugin has been:"
             echo "✓ Created with proper folder structure"
@@ -252,7 +251,7 @@ if [ $? -eq 0 ]; then
         else
             echo "⚠️  Warning: Could not copy plugin to .obsidian/plugins"
             echo "   You can manually copy the plugin files:"
-            echo "   mkdir -p .obsidian/plugins/$PLUGIN_NAME && cp -r plugins/$PLUGIN_NAME/build/* .obsidian/plugins/$PLUGIN_NAME/"
+            echo "   build-support/copy-plugin.sh $PLUGIN_NAME"
             echo ""
             echo "✅ Plugin '$PLUGIN_NAME' created and built successfully!"
             echo ""
@@ -260,7 +259,7 @@ if [ $? -eq 0 ]; then
             echo "1. cd plugins/$PLUGIN_NAME"
             echo "2. npm run dev (for development with watch mode)"
             echo "3. Edit src/main.ts to implement your plugin"
-            echo "4. Copy build folder to .obsidian/plugins/$PLUGIN_NAME"
+            echo "4. Copy build folder: build-support/copy-plugin.sh $PLUGIN_NAME"
             echo ""
             echo "Ready for development! The plugin has been:"
             echo "✓ Created with proper folder structure"
@@ -310,5 +309,5 @@ echo "- Compiled TypeScript to build/main.js"
 echo "- Copied manifest.json to build/ folder"
 echo "- Copied styles.css to build/ folder (if exists)"
 echo "- Copied versions.json to build/ folder (if exists)"
-echo "- Copied build files to: .obsidian/plugins/$PLUGIN_NAME"
+echo "- Copied build files to: .obsidian/plugins/$PLUGIN_NAME (via copy-plugin.sh)"
 echo ""
