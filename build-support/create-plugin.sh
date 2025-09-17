@@ -103,9 +103,7 @@ perl -i -pe "s/obsidian-sample-plugin/$PLUGIN_ID/g" "$TARGET_DIR/package.json"
 perl -i -pe "s/This is a sample plugin for Obsidian \\(https:\\/\\/obsidian\\.md\\)/$PLUGIN_DESCRIPTION/g" "$TARGET_DIR/package.json"
 
 # Update esbuild.config.mjs to point to src/main.ts
-sed -i '' \
-    -e "s|entryPoints: \['main.ts'\]|entryPoints: ['src/main.ts']|" \
-    "$TARGET_DIR/esbuild.config.mjs"
+perl -i -pe 's|entryPoints: \["main\.ts"\]|entryPoints: ["src/main.ts"]|g' "$TARGET_DIR/esbuild.config.mjs"
 
 # Update tsconfig.json include path
 sed -i '' \

@@ -27,6 +27,7 @@ Forge-Plugin-Dev/
 	.obsidian/            # obsidian folder for viewing system to view md files of this actual 
 	 copilot-custom-prompts/       # prompts for copilot plug in not core to this repo!
 
+
 ### Plugin Subfolders
 Each plugin maintains the following minimum structure
 *plugin*/
