@@ -6,8 +6,14 @@
 set -e
 
 if [ -z "$1" ]; then
+    echo "❌ Error: Plugin name is required"
     echo "Usage: $0 <plugin-name>"
     echo "Example: $0 my-awesome-plugin"
+    echo ""
+    echo "Plugin name requirements:"
+    echo "- Must be lowercase"
+    echo "- Use hyphens for word separation"
+    echo "- Alphanumeric characters and hyphens only"
     exit 1
 fi
 
@@ -19,19 +25,37 @@ TARGET_DIR="$PROJECT_ROOT/plugins/$PLUGIN_NAME"
 
 # Validate plugin name (kebab-case, alphanumeric and hyphens only)
 if [[ ! "$PLUGIN_NAME" =~ ^[a-z0-9-]+$ ]]; then
-    echo "Error: Plugin name must be lowercase, alphanumeric, and hyphens only (kebab-case)"
+    echo "❌ Error: Invalid plugin name format"
+    echo "Plugin name must be:"
+    echo "- Lowercase letters only"
+    echo "- Numbers allowed"
+    echo "- Hyphens for word separation"
+    echo "- No spaces, underscores, or special characters"
+    echo ""
+    echo "Examples:"
+    echo "✅ my-awesome-plugin"
+    echo "✅ task-manager"
+    echo "✅ ai-helper-2024"
+    echo "❌ My-Plugin (uppercase)"
+    echo "❌ my_plugin (underscore)"
+    echo "❌ my plugin (space)"
     exit 1
 fi
 
 # Check if template exists
 if [ ! -d "$TEMPLATE_DIR" ]; then
-    echo "Error: Template directory not found: $TEMPLATE_DIR"
+    echo "❌ Error: Template directory not found: $TEMPLATE_DIR"
+    echo "Make sure the obsidian-sample-plugin template exists in examples/"
     exit 1
 fi
 
 # Check if target already exists
 if [ -d "$TARGET_DIR" ]; then
-    echo "Error: Plugin directory already exists: $TARGET_DIR"
+    echo "❌ Error: Plugin '$PLUGIN_NAME' already exists"
+    echo "Directory already exists: $TARGET_DIR"
+    echo ""
+    echo "Choose a different plugin name or remove the existing directory:"
+    echo "rm -rf $TARGET_DIR"
     exit 1
 fi
 
