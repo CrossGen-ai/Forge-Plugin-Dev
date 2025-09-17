@@ -8,5 +8,5 @@ Creates a new Obsidian plugin from the sample template with proper structure and
 ```
 ## Command
 ```bash
-./build-support/create-plugin.sh $ARGUMENTS
+./build-support/copy-plugin.sh $ARGUMENTS
 ```

@@ -2,7 +2,8 @@
 # Description: 
 Canonical metadata for the Forge-Plugin-Dev workspace. All projects in this vault are Obsidian plugins; plugin implementations live in the plugins folder and shared code lives in the packages folder.
 
-
+Coding prinples:
+1) DRY principle
 
 ## Folders
 
