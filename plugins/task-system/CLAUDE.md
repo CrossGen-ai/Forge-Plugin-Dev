@@ -80,10 +80,7 @@ npm run build
 
 ## Testing
 
-- Manual install for testing: copy `main.js`, `manifest.json`, `styles.css` (if any) to:
-  ```
-  <Vault>/.obsidian/plugins/<plugin-id>/
-  ```
+- npm run dev auto deplays to the plugins of our obsidian
 - Reload Obsidian and enable the plugin in **Settings → Community plugins**.
 
 ## Commands & settings
