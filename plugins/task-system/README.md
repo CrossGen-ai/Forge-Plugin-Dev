@@ -1,4 +1,4 @@
-Rea# task system
+Obsidian Sample Plugin
 
 A new Obsidian plugin: task system
 
