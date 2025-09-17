@@ -149,14 +149,54 @@ sed -i '' \
     -e "s/This is a sample plugin for Obsidian (https:\/\/obsidian.md)\./$PLUGIN_DESCRIPTION/" \
     "$TARGET_DIR/README.md"
 
+# Install dependencies and build
 echo ""
-echo "✅ Plugin '$PLUGIN_NAME' created successfully!"
-echo ""
-echo "Next steps:"
-echo "1. cd plugins/$PLUGIN_NAME"
-echo "2. npm install"
-echo "3. npm run dev"
-echo "4. Edit src/main.ts to implement your plugin"
+echo "📦 Installing dependencies..."
+cd "$TARGET_DIR"
+npm install
+
+if [ $? -eq 0 ]; then
+    echo "✅ Dependencies installed successfully"
+    echo ""
+    echo "🔨 Building plugin..."
+    npm run build
+
+    if [ $? -eq 0 ]; then
+        echo "✅ Plugin built successfully"
+        echo ""
+        echo "✅ Plugin '$PLUGIN_NAME' created and built successfully!"
+        echo ""
+        echo "Next steps:"
+        echo "1. cd plugins/$PLUGIN_NAME"
+        echo "2. npm run dev (for development with watch mode)"
+        echo "3. Edit src/main.ts to implement your plugin"
+        echo ""
+        echo "Ready for development! The plugin has been:"
+        echo "✓ Created with proper folder structure"
+        echo "✓ Dependencies installed"
+        echo "✓ Built successfully (main.js created)"
+    else
+        echo "❌ Build failed. You may need to fix TypeScript errors before continuing."
+        echo ""
+        echo "Next steps:"
+        echo "1. cd plugins/$PLUGIN_NAME"
+        echo "2. Fix any TypeScript errors in src/main.ts"
+        echo "3. npm run build"
+        echo "4. npm run dev"
+    fi
+else
+    echo "❌ npm install failed. Please check your Node.js installation and network connection."
+    echo ""
+    echo "Manual steps required:"
+    echo "1. cd plugins/$PLUGIN_NAME"
+    echo "2. npm install"
+    echo "3. npm run build"
+    echo "4. npm run dev"
+fi
+
+# Return to original directory
+cd "$PROJECT_ROOT"
+
 echo ""
 echo "Plugin structure created with:"
 echo "- docs/ - Documentation files"
