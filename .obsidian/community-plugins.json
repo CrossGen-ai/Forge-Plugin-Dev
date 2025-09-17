@@ -3,5 +3,6 @@
   "obsidian-ai-cli",
   "symlink-creator",
   "show-hidden-files",
-  "obsidian-git"
+  "obsidian-git",
+  "task-system"
 ]

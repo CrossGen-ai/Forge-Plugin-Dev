@@ -23,7 +23,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 TEMPLATE_DIR="$PROJECT_ROOT/examples/obsidian-sample-plugin"
 TARGET_DIR="$PROJECT_ROOT/plugins/$PLUGIN_NAME"
 OBSIDIAN_PLUGINS_DIR="$PROJECT_ROOT/.obsidian/plugins"
-SYMLINK_TARGET="$OBSIDIAN_PLUGINS_DIR/$PLUGIN_NAME"
+PLUGIN_TARGET="$OBSIDIAN_PLUGINS_DIR/$PLUGIN_NAME"
 
 # Validate plugin name (kebab-case, alphanumeric and hyphens only)
 if [[ ! "$PLUGIN_NAME" =~ ^[a-z0-9-]+$ ]]; then
@@ -69,12 +69,12 @@ if [ ! -d "$OBSIDIAN_PLUGINS_DIR" ]; then
 fi
 
 # Check if plugin target already exists
-if [ -e "$SYMLINK_TARGET" ]; then
+if [ -e "$PLUGIN_TARGET" ]; then
     echo "❌ Error: Plugin '$PLUGIN_NAME' already exists in .obsidian/plugins"
-    echo "File/directory already exists: $SYMLINK_TARGET"
+    echo "File/directory already exists: $PLUGIN_TARGET"
     echo ""
     echo "Choose a different plugin name or remove the existing entry:"
-    echo "rm -rf $SYMLINK_TARGET"
+    echo "rm -rf $PLUGIN_TARGET"
     exit 1
 fi
 
@@ -231,7 +231,7 @@ if [ $? -eq 0 ]; then
 
         # Copy build folder contents to .obsidian/plugins directory
         cd "$PROJECT_ROOT"
-        if mkdir -p "$SYMLINK_TARGET" && cp -r "plugins/$PLUGIN_NAME/build/"* "$SYMLINK_TARGET/" 2>/dev/null; then
+        if mkdir -p "$PLUGIN_TARGET" && cp -r "plugins/$PLUGIN_NAME/build/"* "$PLUGIN_TARGET/" 2>/dev/null; then
             echo "✅ Plugin copied: .obsidian/plugins/$PLUGIN_NAME"
             echo ""
             echo "✅ Plugin '$PLUGIN_NAME' created and ready for use!"
