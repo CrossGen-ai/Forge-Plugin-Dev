@@ -72,3 +72,6 @@ jspm_packages/
 # Obsidian workspace files
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
+
+# Plugin configuration files (may contain API keys)
+.obsidian/plugins/*/data.json
