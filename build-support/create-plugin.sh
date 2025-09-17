@@ -94,6 +94,7 @@ mkdir -p "$TARGET_DIR/plugin-agents"
 mkdir -p "$TARGET_DIR/plugin-commands"
 mkdir -p "$TARGET_DIR/tests"
 mkdir -p "$TARGET_DIR/src"
+mkdir -p "$TARGET_DIR/build"
 
 # Move main.ts to src/ folder
 if [ -f "$TARGET_DIR/main.ts" ]; then
@@ -121,8 +122,9 @@ perl -i -pe 's|"https://obsidian.md/pricing"|""|g' "$TARGET_DIR/manifest.json"
 perl -i -pe "s/obsidian-sample-plugin/$PLUGIN_ID/g" "$TARGET_DIR/package.json"
 perl -i -pe "s/This is a sample plugin for Obsidian \\(https:\\/\\/obsidian\\.md\\)/$PLUGIN_DESCRIPTION/g" "$TARGET_DIR/package.json"
 
-# Update esbuild.config.mjs to point to src/main.ts
+# Update esbuild.config.mjs to point to src/main.ts and output to build/
 perl -i -pe 's|entryPoints: \["main\.ts"\]|entryPoints: ["src/main.ts"]|g' "$TARGET_DIR/esbuild.config.mjs"
+perl -i -pe 's|outfile: "main\.js"|outfile: "build/main.js"|g' "$TARGET_DIR/esbuild.config.mjs"
 
 # Update tsconfig.json include path
 sed -i '' \
@@ -205,12 +207,32 @@ if [ $? -eq 0 ]; then
     if [ $? -eq 0 ]; then
         echo "✅ Plugin built successfully"
         echo ""
+        echo "📦 Copying plugin files to build folder..."
+
+        # Copy manifest.json to build folder
+        cp "$TARGET_DIR/manifest.json" "$TARGET_DIR/build/"
+
+        # Copy styles.css if it exists
+        if [ -f "$TARGET_DIR/styles.css" ]; then
+            cp "$TARGET_DIR/styles.css" "$TARGET_DIR/build/"
+            echo "✓ Copied styles.css"
+        fi
+
+        # Copy versions.json if it exists
+        if [ -f "$TARGET_DIR/versions.json" ]; then
+            cp "$TARGET_DIR/versions.json" "$TARGET_DIR/build/"
+            echo "✓ Copied versions.json"
+        fi
+
+        echo "✓ Copied manifest.json"
+        echo "✓ Build folder ready with all required files"
+        echo ""
         echo "🔗 Creating symlink for Obsidian..."
 
-        # Create symlink using relative path for portability
+        # Create symlink using relative path for portability (pointing to build folder)
         cd "$PROJECT_ROOT"
-        if ln -s "../../plugins/$PLUGIN_NAME" "$SYMLINK_TARGET" 2>/dev/null; then
-            echo "✅ Symlink created: .obsidian/plugins/$PLUGIN_NAME -> plugins/$PLUGIN_NAME"
+        if ln -s "../../plugins/$PLUGIN_NAME/build" "$SYMLINK_TARGET" 2>/dev/null; then
+            echo "✅ Symlink created: .obsidian/plugins/$PLUGIN_NAME -> plugins/$PLUGIN_NAME/build"
             echo ""
             echo "✅ Plugin '$PLUGIN_NAME' created and ready for use!"
             echo ""
@@ -223,12 +245,13 @@ if [ $? -eq 0 ]; then
             echo "Ready for development! The plugin has been:"
             echo "✓ Created with proper folder structure"
             echo "✓ Dependencies installed"
-            echo "✓ Built successfully (main.js created)"
+            echo "✓ Built successfully (build/main.js created)"
+            echo "✓ All plugin files copied to build/ folder"
             echo "✓ Symlinked to .obsidian/plugins for immediate use"
         else
             echo "⚠️  Warning: Could not create symlink to .obsidian/plugins"
             echo "   You can manually copy the plugin files or create the symlink:"
-            echo "   ln -s ../../plugins/$PLUGIN_NAME .obsidian/plugins/$PLUGIN_NAME"
+            echo "   ln -s ../../plugins/$PLUGIN_NAME/build .obsidian/plugins/$PLUGIN_NAME"
             echo ""
             echo "✅ Plugin '$PLUGIN_NAME' created and built successfully!"
             echo ""
@@ -236,12 +259,12 @@ if [ $? -eq 0 ]; then
             echo "1. cd plugins/$PLUGIN_NAME"
             echo "2. npm run dev (for development with watch mode)"
             echo "3. Edit src/main.ts to implement your plugin"
-            echo "4. Copy plugin to .obsidian/plugins/$PLUGIN_NAME or create symlink"
+            echo "4. Copy build folder to .obsidian/plugins/$PLUGIN_NAME or create symlink"
             echo ""
             echo "Ready for development! The plugin has been:"
             echo "✓ Created with proper folder structure"
             echo "✓ Dependencies installed"
-            echo "✓ Built successfully (main.js created)"
+            echo "✓ Built successfully (build/main.js created)"
         fi
     else
         echo "❌ Build failed. You may need to fix TypeScript errors before continuing."
@@ -272,11 +295,19 @@ echo "- plugin-agents/ - Claude Code agents"
 echo "- plugin-commands/ - Claude Code commands"
 echo "- tests/ - Test files"
 echo "- src/ - Source code (main.ts moved here)"
+echo "- build/ - Build output folder (main.js, manifest.json, styles.css)"
 echo ""
 echo "Files updated:"
 echo "- manifest.json (id, name, description, author fields cleared)"
 echo "- package.json (name, description)"
-echo "- esbuild.config.mjs (entry point to src/main.ts)"
+echo "- esbuild.config.mjs (entry point to src/main.ts, output to build/main.js)"
 echo "- tsconfig.json (include src/**/*)"
 echo "- README.md (title, description)"
+echo ""
+echo "Build process:"
+echo "- Compiled TypeScript to build/main.js"
+echo "- Copied manifest.json to build/ folder"
+echo "- Copied styles.css to build/ folder (if exists)"
+echo "- Copied versions.json to build/ folder (if exists)"
+echo "- Created symlink: .obsidian/plugins/$PLUGIN_NAME -> plugins/$PLUGIN_NAME/build"
 echo ""
