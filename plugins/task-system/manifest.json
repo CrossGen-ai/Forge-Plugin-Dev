@@ -1,6 +1,6 @@
 {
 	"id": "task-system",
-	"name": "task system",
+	"name": "Task System",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "A new Obsidian plugin: task system",

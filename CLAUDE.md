@@ -2,10 +2,12 @@
 # Description: 
 Canonical metadata for the Forge-Plugin-Dev workspace. All projects in this vault are Obsidian plugins; plugin implementations live in the plugins folder and shared code lives in the packages folder.
 
-Coding prinples:
+# Principles
+Coding principles:
 1) DRY principle
+2) KISS priniple
 
-## Folders
+# Folders
 
 ### Plugin Folders
 Forge-Plugin-Dev/
@@ -64,5 +66,25 @@ Claude and other agents should **follow these rules when creating or editing cod
 ### 2. File & Folder Structure
 - Organize code **by feature**, not only by layer.  e.g., `tasks/`, `contacts/`)
 - Each file name uses the `feature.type.ts` pattern.
+
+---
+
+## Plugin Development Commands
+
+### Create New Plugin
+- `/build-support:init-new-plugin plugin-name` - Creates new plugin with enhanced dev setup
+
+### Development Workflow
+- `npm run dev` - Watch mode: builds to `.obsidian/plugins/` with file watchers (CSS, manifest, versions)
+- Real-time editing: Edit any file → instant Obsidian update
+- 
+- `npm run build` - Production: builds to `build/` folder for distribution
+- user must run `/build-support:deploy-plugin plugin-name` after a production build
+
+### File Watchers (Dev Mode)
+- `src/main.ts` → `.obsidian/plugins/{plugin}/main.js`
+- `styles.css` → `.obsidian/plugins/{plugin}/styles.css`
+- `manifest.json` → `.obsidian/plugins/{plugin}/manifest.json`
+- `versions.json` → `.obsidian/plugins/{plugin}/versions.json`
 
 ---

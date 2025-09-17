@@ -1,6 +1,7 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import { copyFileSync, watchFile } from "fs";
 
 const banner =
 `/*
@@ -10,6 +11,23 @@ if you want to view the source, please visit the github repository of this plugi
 `;
 
 const prod = (process.argv[2] === "production");
+
+// Copy files to appropriate location
+const copyFile = (filename) => {
+	const target = prod ? `build/${filename}` : `../../.obsidian/plugins/task-system/${filename}`;
+	try {
+		copyFileSync(filename, target);
+		console.log(`✓ Copied ${filename} to ${target}`);
+	} catch (err) {
+		console.log(`ℹ ${filename} not found or could not copy`);
+	}
+};
+
+const copyAllAssets = () => {
+	copyFile("styles.css");
+	copyFile("manifest.json");
+	copyFile("versions.json");
+};
 
 const context = await esbuild.context({
 	banner: {
@@ -37,13 +55,38 @@ const context = await esbuild.context({
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
-	outfile: "build/main.js",
+	outfile: prod ? "build/main.js" : "../../.obsidian/plugins/task-system/main.js",
 	minify: prod,
+	plugins: [
+		{
+			name: 'asset-watcher',
+			setup(build) {
+				if (!prod) {
+					build.onEnd(() => {
+						copyAllAssets();
+					});
+				}
+			},
+		},
+	],
 });
 
 if (prod) {
 	await context.rebuild();
+	copyAllAssets();
 	process.exit(0);
 } else {
+	copyAllAssets(); // Initial copy of all assets
+
+	// Watch asset files for changes
+	const watchedFiles = ['styles.css', 'manifest.json', 'versions.json'];
+
+	watchedFiles.forEach(filename => {
+		watchFile(filename, () => {
+			console.log(`${filename} changed, copying...`);
+			copyFile(filename);
+		});
+	});
+
 	await context.watch();
 }

@@ -1,8 +1,34 @@
 /*
-
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
+Task System Plugin Styles
 */
+
+/* Ribbon icon styling */
+.my-plugin-ribbon-class {
+    color: #00bcd4 !important; /* Cyan color for testing CSS watcher */
+}
+
+/* Alternative: Target the SVG directly for more control */
+.my-plugin-ribbon-class svg {
+    color: #00bcd4 !important;
+    fill: currentColor;
+}
+
+/* Hover effect */
+.my-plugin-ribbon-class:hover {
+    color: #ff5252 !important; /* Darker red on hover */
+}
+
+/* You can also use CSS variables for consistency with Obsidian themes */
+.my-plugin-ribbon-class.theme-aware {
+    color: var(--color-accent) !important;
+}
+
+/* For different states */
+.my-plugin-ribbon-class.active {
+    color: #4caf50 !important; /* Green when active */
+}
+
+.my-plugin-ribbon-class.disabled {
+    color: #9e9e9e !important; /* Gray when disabled */
+    opacity: 0.5;
+}

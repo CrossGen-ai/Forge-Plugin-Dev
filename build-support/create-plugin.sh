@@ -125,6 +125,7 @@ perl -i -pe "s/This is a sample plugin for Obsidian \\(https:\\/\\/obsidian\\.md
 # Update esbuild.config.mjs to point to src/main.ts and output to build/
 perl -i -pe 's|entryPoints: \["main\.ts"\]|entryPoints: ["src/main.ts"]|g' "$TARGET_DIR/esbuild.config.mjs"
 perl -i -pe 's|outfile: "main\.js"|outfile: "build/main.js"|g' "$TARGET_DIR/esbuild.config.mjs"
+perl -i -pe "s/sample-plugin/$PLUGIN_ID/g" "$TARGET_DIR/esbuild.config.mjs"
 
 # Update tsconfig.json include path
 sed -i '' \
