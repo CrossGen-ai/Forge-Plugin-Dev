@@ -22,6 +22,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 TEMPLATE_DIR="$PROJECT_ROOT/examples/obsidian-sample-plugin"
 TARGET_DIR="$PROJECT_ROOT/plugins/$PLUGIN_NAME"
+OBSIDIAN_PLUGINS_DIR="$PROJECT_ROOT/.obsidian/plugins"
+SYMLINK_TARGET="$OBSIDIAN_PLUGINS_DIR/$PLUGIN_NAME"
 
 # Validate plugin name (kebab-case, alphanumeric and hyphens only)
 if [[ ! "$PLUGIN_NAME" =~ ^[a-z0-9-]+$ ]]; then
@@ -56,6 +58,23 @@ if [ -d "$TARGET_DIR" ]; then
     echo ""
     echo "Choose a different plugin name or remove the existing directory:"
     echo "rm -rf $TARGET_DIR"
+    exit 1
+fi
+
+# Check if .obsidian/plugins directory exists
+if [ ! -d "$OBSIDIAN_PLUGINS_DIR" ]; then
+    echo "❌ Error: .obsidian/plugins directory not found: $OBSIDIAN_PLUGINS_DIR"
+    echo "Make sure you're running this script from the Obsidian vault root directory"
+    exit 1
+fi
+
+# Check if symlink target already exists
+if [ -e "$SYMLINK_TARGET" ]; then
+    echo "❌ Error: Plugin '$PLUGIN_NAME' already exists in .obsidian/plugins"
+    echo "File/directory already exists: $SYMLINK_TARGET"
+    echo ""
+    echo "Choose a different plugin name or remove the existing entry:"
+    echo "rm -rf $SYMLINK_TARGET"
     exit 1
 fi
 
@@ -186,17 +205,44 @@ if [ $? -eq 0 ]; then
     if [ $? -eq 0 ]; then
         echo "✅ Plugin built successfully"
         echo ""
-        echo "✅ Plugin '$PLUGIN_NAME' created and built successfully!"
-        echo ""
-        echo "Next steps:"
-        echo "1. cd plugins/$PLUGIN_NAME"
-        echo "2. npm run dev (for development with watch mode)"
-        echo "3. Edit src/main.ts to implement your plugin"
-        echo ""
-        echo "Ready for development! The plugin has been:"
-        echo "✓ Created with proper folder structure"
-        echo "✓ Dependencies installed"
-        echo "✓ Built successfully (main.js created)"
+        echo "🔗 Creating symlink for Obsidian..."
+
+        # Create symlink using relative path for portability
+        cd "$PROJECT_ROOT"
+        if ln -s "../../plugins/$PLUGIN_NAME" "$SYMLINK_TARGET" 2>/dev/null; then
+            echo "✅ Symlink created: .obsidian/plugins/$PLUGIN_NAME -> plugins/$PLUGIN_NAME"
+            echo ""
+            echo "✅ Plugin '$PLUGIN_NAME' created and ready for use!"
+            echo ""
+            echo "Next steps:"
+            echo "1. cd plugins/$PLUGIN_NAME"
+            echo "2. npm run dev (for development with watch mode)"
+            echo "3. Edit src/main.ts to implement your plugin"
+            echo "4. Enable the plugin in Obsidian Settings → Community Plugins"
+            echo ""
+            echo "Ready for development! The plugin has been:"
+            echo "✓ Created with proper folder structure"
+            echo "✓ Dependencies installed"
+            echo "✓ Built successfully (main.js created)"
+            echo "✓ Symlinked to .obsidian/plugins for immediate use"
+        else
+            echo "⚠️  Warning: Could not create symlink to .obsidian/plugins"
+            echo "   You can manually copy the plugin files or create the symlink:"
+            echo "   ln -s ../../plugins/$PLUGIN_NAME .obsidian/plugins/$PLUGIN_NAME"
+            echo ""
+            echo "✅ Plugin '$PLUGIN_NAME' created and built successfully!"
+            echo ""
+            echo "Next steps:"
+            echo "1. cd plugins/$PLUGIN_NAME"
+            echo "2. npm run dev (for development with watch mode)"
+            echo "3. Edit src/main.ts to implement your plugin"
+            echo "4. Copy plugin to .obsidian/plugins/$PLUGIN_NAME or create symlink"
+            echo ""
+            echo "Ready for development! The plugin has been:"
+            echo "✓ Created with proper folder structure"
+            echo "✓ Dependencies installed"
+            echo "✓ Built successfully (main.js created)"
+        fi
     else
         echo "❌ Build failed. You may need to fix TypeScript errors before continuing."
         echo ""
