@@ -59,6 +59,7 @@ interface App {
 }
 ```
 
+
 ## Plugin Lifecycle
 
 ### onload() Method
