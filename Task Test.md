@@ -2,10 +2,9 @@
 atomic-task: true
 title: Task Test
 tags: []
-created_date: "2025-09-18"
+created_date: "2025-09-20"
 priority: medium
-dependencies: []
 status: todo
-new_note: "true"
+ai_task: false
+dependencies: []
 ---
-asdf to 

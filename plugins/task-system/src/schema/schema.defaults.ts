@@ -31,7 +31,12 @@ export class DefaultValueAssigner {
 
         // Set default status if missing
         if (!updated.status || updated.status === '') {
-            updated.status = settings.defaultStatus || 'todo';
+            updated.status = settings.defaultStatus || settings.statusConfigs[0]?.value || 'todo';
+        }
+
+        // Set default ai_task if missing
+        if (updated.ai_task === undefined || updated.ai_task === null) {
+            updated.ai_task = false;
         }
 
         // Apply defaults from custom schema fields
@@ -105,7 +110,7 @@ export class DefaultValueAssigner {
     }
 
     private static getRequiredFieldNames(customFields: CustomSchemaField[]): string[] {
-        const coreRequired = ['atomic-task', 'title', 'created_date', 'status'];
+        const coreRequired = ['atomic-task', 'title', 'created_date', 'status', 'ai_task'];
         const customRequired = customFields.filter(f => f.required).map(f => f.key);
         return [...coreRequired, ...customRequired];
     }

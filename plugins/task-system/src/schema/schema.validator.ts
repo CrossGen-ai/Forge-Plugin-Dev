@@ -1,5 +1,5 @@
-import { getCombinedSchemaFields, getRequiredFields, CORE_REQUIRED_FIELDS, VALID_STATUS_VALUES, VALID_PRIORITY_VALUES } from './schema.definition';
-import type { CustomSchemaField } from '../settings/settings.interface';
+import { getCombinedSchemaFields, getRequiredFields, CORE_REQUIRED_FIELDS, VALID_PRIORITY_VALUES } from './schema.definition';
+import type { CustomSchemaField, StatusConfig } from '../settings/settings.interface';
 import { DateUtils } from '../utils/date.utils';
 
 export interface ValidationResult {
@@ -24,7 +24,7 @@ export class SchemaValidator {
     /**
      * Validate frontmatter against dynamic schema
      */
-    static validate(frontmatter: Record<string, any>, customFields: CustomSchemaField[] = []): ValidationResult {
+    static validate(frontmatter: Record<string, any>, statusConfigs: StatusConfig[], customFields: CustomSchemaField[] = []): ValidationResult {
         const result: ValidationResult = {
             isValid: true,
             errors: [],
@@ -37,7 +37,7 @@ export class SchemaValidator {
         }
 
         // Get combined schema fields
-        const schemaFields = getCombinedSchemaFields(customFields);
+        const schemaFields = getCombinedSchemaFields(statusConfigs, customFields);
         const requiredFields = getRequiredFields(customFields);
 
         // Check required fields
@@ -57,7 +57,7 @@ export class SchemaValidator {
 
         // Validate each field according to its schema definition
         this.validateSchemaFields(frontmatter, schemaFields, result);
-        this.validateLogicalRules(frontmatter, result);
+        this.validateLogicalRules(frontmatter, result, statusConfigs);
 
         return result;
     }
@@ -168,27 +168,31 @@ export class SchemaValidator {
         }
     }
 
-    private static validateLogicalRules(frontmatter: Record<string, any>, result: ValidationResult): void {
-        // Warn if completed_date is set but status is not 'done'
-        if (frontmatter.completed_date && frontmatter.status !== 'done') {
+    private static validateLogicalRules(frontmatter: Record<string, any>, result: ValidationResult, statusConfigs: StatusConfig[]): void {
+        // Get completed status values
+        const completedStatuses = statusConfigs.filter(s => s.isCompleted).map(s => s.value);
+        const isCompleted = completedStatuses.includes(frontmatter.status);
+
+        // Warn if completed_date is set but status is not a completed status
+        if (frontmatter.completed_date && !isCompleted) {
             result.warnings.push({
                 field: 'completed_date',
-                message: 'completed_date is set but status is not "done"',
+                message: `completed_date is set but status is not a completed status (${completedStatuses.join(', ')})`,
                 severity: 'warning'
             });
         }
 
-        // Warn if status is 'done' but no completed_date
-        if (frontmatter.status === 'done' && !frontmatter.completed_date) {
+        // Warn if status is completed but no completed_date
+        if (isCompleted && !frontmatter.completed_date) {
             result.warnings.push({
                 field: 'completed_date',
-                message: 'status is "done" but completed_date is not set',
+                message: 'status is completed but completed_date is not set',
                 severity: 'warning'
             });
         }
 
-        // Warn if due_date is in the past and status is not 'done'
-        if (frontmatter.due_date && frontmatter.status !== 'done') {
+        // Warn if due_date is in the past and status is not completed
+        if (frontmatter.due_date && !isCompleted) {
             const dueDate = DateUtils.parseDate(frontmatter.due_date);
             const today = new Date();
             today.setHours(0, 0, 0, 0); // Reset time for date comparison

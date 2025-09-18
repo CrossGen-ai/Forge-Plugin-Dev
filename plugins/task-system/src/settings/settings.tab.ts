@@ -1,6 +1,7 @@
 import { App, PluginSettingTab, Setting, Modal, TextComponent, DropdownComponent } from 'obsidian';
-import { VALID_STATUS_VALUES, VALID_PRIORITY_VALUES, CORE_SCHEMA_FIELDS } from '../schema/schema.definition';
-import type { CustomSchemaField } from './settings.interface';
+import { VALID_PRIORITY_VALUES, getCoreSchemaFields, getValidStatusValues } from '../schema/schema.definition';
+import type { CustomSchemaField, StatusConfig } from './settings.interface';
+import { ListEditorComponent } from './components/ListEditorComponent';
 import type TaskSystemPlugin from '../main';
 
 export class TaskSystemSettingTab extends PluginSettingTab {
@@ -57,6 +58,11 @@ export class TaskSystemSettingTab extends PluginSettingTab {
                 })
             );
 
+        // Status Configuration Section
+        containerEl.createEl('h3', { text: 'Task Status Configuration' });
+        const statusContainer = containerEl.createDiv('status-configuration-container');
+        this.renderStatusConfiguration(statusContainer);
+
         containerEl.createEl('h3', { text: 'Default Values' });
 
         // Default status dropdown
@@ -65,15 +71,17 @@ export class TaskSystemSettingTab extends PluginSettingTab {
             .setDesc('Default status for new atomic tasks')
             .addDropdown(dropdown => {
                 const options: Record<string, string> = {};
-                VALID_STATUS_VALUES.forEach(status => {
-                    options[status] = status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const statusValues = getValidStatusValues(this.plugin.settings.statusConfigs);
+                statusValues.forEach(status => {
+                    const config = this.plugin.settings.statusConfigs.find(c => c.value === status);
+                    options[status] = config?.label || status;
                 });
 
                 return dropdown
                     .addOptions(options)
                     .setValue(this.plugin.settings.defaultStatus)
                     .onChange(async (value) => {
-                        this.plugin.settings.defaultStatus = value as any;
+                        this.plugin.settings.defaultStatus = value;
                         await this.plugin.saveSettings();
                     });
             });
@@ -144,7 +152,8 @@ export class TaskSystemSettingTab extends PluginSettingTab {
         const coreInfo = containerEl.createDiv('core-fields-info');
         coreInfo.createEl('p', { text: 'Core required fields (cannot be modified):' });
         const coreList = coreInfo.createEl('ul');
-        CORE_SCHEMA_FIELDS.forEach(field => {
+        const coreFields = getCoreSchemaFields(this.plugin.settings.statusConfigs);
+        coreFields.forEach(field => {
             const label = `${field.displayName || field.name} (${field.type}${field.required ? ', required' : ''})`;
             coreList.createEl('li', { text: label });
         });
@@ -168,6 +177,89 @@ export class TaskSystemSettingTab extends PluginSettingTab {
                     }).open();
                 })
             );
+    }
+
+    private renderStatusConfiguration(container: HTMLElement): void {
+        new ListEditorComponent<StatusConfig>({
+            container,
+            items: this.plugin.settings.statusConfigs,
+            headers: ['Status Value', 'Display Label', 'Color', 'Completed', 'Actions'],
+            className: 'status-config',
+            onItemsChange: async (items) => {
+                this.plugin.settings.statusConfigs = items;
+                await this.plugin.saveSettings();
+                // Refresh the display to update dropdowns
+                this.display();
+            },
+            renderItem: (itemContainer, item, index, updateItem, deleteItem) => {
+                // Status value input
+                const valueCell = itemContainer.createDiv('settings-view__cell');
+                const valueInput = valueCell.createEl('input', {
+                    type: 'text',
+                    value: item.value,
+                    placeholder: 'e.g., in_progress'
+                });
+                valueInput.addEventListener('input', () => {
+                    updateItem({ value: valueInput.value.toLowerCase().replace(/[^a-z0-9_]/g, '') });
+                });
+
+                // Display label input
+                const labelCell = itemContainer.createDiv('settings-view__cell');
+                const labelInput = labelCell.createEl('input', {
+                    type: 'text',
+                    value: item.label,
+                    placeholder: 'e.g., In Progress'
+                });
+                labelInput.addEventListener('input', () => {
+                    updateItem({ label: labelInput.value });
+                });
+
+                // Color picker
+                const colorCell = itemContainer.createDiv('settings-view__cell');
+                const colorInput = colorCell.createEl('input', {
+                    type: 'color',
+                    value: item.color
+                });
+                colorInput.addEventListener('input', () => {
+                    updateItem({ color: colorInput.value });
+                });
+
+                // Completed checkbox
+                const completedCell = itemContainer.createDiv('settings-view__cell');
+                const completedInput = completedCell.createEl('input', {
+                    type: 'checkbox'
+                });
+                completedInput.checked = item.isCompleted;
+                completedInput.addEventListener('change', () => {
+                    updateItem({ isCompleted: completedInput.checked });
+                });
+
+                // Actions
+                const actionsCell = itemContainer.createDiv('settings-view__cell');
+                const deleteButton = actionsCell.createEl('button', {
+                    text: '×',
+                    cls: 'clickable-icon',
+                    attr: { 'aria-label': 'Delete status' }
+                });
+                deleteButton.addEventListener('click', deleteItem);
+            },
+            canDelete: (item) => this.plugin.settings.statusConfigs.length > 2, // Minimum 2 statuses
+            minItems: 2,
+            dragEnabled: true,
+            addButtonText: 'Add Status',
+            createNewItem: () => {
+                const existingOrders = this.plugin.settings.statusConfigs.map(s => s.order);
+                const maxOrder = existingOrders.length > 0 ? Math.max(...existingOrders) : 0;
+                return {
+                    id: `status-${Date.now()}`,
+                    value: 'new_status',
+                    label: 'New Status',
+                    color: '#808080',
+                    isCompleted: false,
+                    order: maxOrder + 1
+                };
+            }
+        });
     }
 
     private renderCustomFields(container: HTMLElement): void {
@@ -417,7 +509,8 @@ class CustomFieldModal extends Modal {
         }
 
         // Check that key doesn't conflict with core fields
-        const coreKeys = CORE_SCHEMA_FIELDS.map(f => f.name);
+        const coreFields = getCoreSchemaFields(this.plugin.settings.statusConfigs);
+        const coreKeys = coreFields.map(f => f.name);
         if (coreKeys.includes(this.field.key)) {
             alert(`The key "${this.field.key}" is reserved for core fields`);
             return false;
