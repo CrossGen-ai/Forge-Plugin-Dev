@@ -6,12 +6,17 @@ export class FrontmatterWriter {
 
     async writeFrontmatter(file: TFile, frontmatter: Record<string, any>): Promise<void> {
         try {
+            if (frontmatter['atomic-task']) {
+                console.log(`[TaskSystem] Writing frontmatter for atomic task:`, frontmatter);
+            }
             const content = await this.app.vault.read(file);
             const yamlString = yaml.dump(frontmatter, {
                 indent: 2,
                 lineWidth: -1,
                 noRefs: true,
-                sortKeys: false
+                sortKeys: false,
+                quotingType: '"',
+                forceQuotes: false
             });
 
             let newContent: string;

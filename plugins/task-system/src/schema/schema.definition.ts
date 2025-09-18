@@ -1,5 +1,5 @@
 export interface AtomicTaskSchema {
-    'atomic-task': boolean;        // Required
+    atomicTask: boolean;        // Required
     title: string;              // Required
     created_date: string;       // Required (ISO date)
     status: TaskStatus;         // Required

@@ -102,7 +102,12 @@ export class SchemaValidator {
 
         for (const field of dateFields) {
             if (frontmatter[field] !== undefined && frontmatter[field] !== '') {
-                if (!DateUtils.isValidDateString(frontmatter[field])) {
+                // Check if it's a Date object (which should be converted) or invalid string
+                if (frontmatter[field] instanceof Date) {
+                    // This is a Date object, which means YAML parsing converted it
+                    // We should accept this but it will be normalized later
+                    continue;
+                } else if (typeof frontmatter[field] === 'string' && !DateUtils.isValidDateString(frontmatter[field])) {
                     result.errors.push({
                         field,
                         message: `${field} must be a valid date in YYYY-MM-DD format`,

@@ -15,9 +15,18 @@ export class DefaultValueAssigner {
             updated.title = this.extractTitleFromFilename(filename);
         }
 
-        // Auto-populate created_date if missing
+        // Auto-populate created_date ONLY if missing or empty (never overwrite existing dates)
         if (!updated.created_date || updated.created_date === '') {
             updated.created_date = DateUtils.formatCurrentDate();
+            console.log(`[TaskSystem] Setting created_date to: ${updated.created_date} for file: ${filename}`);
+        } else {
+            // Convert Date objects to string format if needed
+            if (updated.created_date instanceof Date) {
+                updated.created_date = DateUtils.formatDate(updated.created_date);
+                console.log(`[TaskSystem] Converted Date object to string: ${updated.created_date} for file: ${filename}`);
+            } else {
+                console.log(`[TaskSystem] Preserving existing created_date: ${updated.created_date} for file: ${filename}`);
+            }
         }
 
         // Set default status if missing
@@ -38,6 +47,15 @@ export class DefaultValueAssigner {
         if (!Array.isArray(updated.dependencies)) {
             updated.dependencies = DEFAULT_VALUES.dependencies;
         }
+
+        // Normalize all date fields to string format
+        const dateFields = ['due_date', 'completed_date'];
+        dateFields.forEach(field => {
+            if (updated[field] && updated[field] instanceof Date) {
+                updated[field] = DateUtils.formatDate(updated[field]);
+                console.log(`[TaskSystem] Normalized ${field} from Date object to string: ${updated[field]} for file: ${filename}`);
+            }
+        });
 
         return updated;
     }

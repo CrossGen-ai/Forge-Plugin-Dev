@@ -12,6 +12,9 @@ export class FrontmatterReader {
             if (!frontmatterMatch) return null;
 
             const parsed = yaml.load(frontmatterMatch[1]) as Record<string, any>;
+            if (parsed && parsed['atomic-task']) {
+                console.log(`[TaskSystem] Parsed frontmatter for atomic task:`, parsed);
+            }
             return parsed || null;
         } catch (error) {
             console.error('Failed to read frontmatter:', error);
