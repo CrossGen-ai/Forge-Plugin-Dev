@@ -1167,10 +1167,16 @@ class ToolView extends ItemView {
 		return new Promise((resolve, reject) => {
 			const timeout = 600000;
 			
-			this.currentProcess = spawn(command, [], { 
+			// Parse command and arguments properly for spawn
+			const [cmd, ...args] = command.split(' ');
+			this.currentProcess = spawn(cmd, args, {
 				cwd,
-				shell: true,
-				stdio: ['pipe', 'pipe', 'pipe']
+				shell: false,
+				stdio: ['pipe', 'pipe', 'pipe'],
+				env: {
+					...process.env,
+					PATH: process.env.PATH + ':/opt/homebrew/bin:/usr/local/bin'
+				}
 			});
 
 			// Handle stdin content or close immediately to prevent hanging
