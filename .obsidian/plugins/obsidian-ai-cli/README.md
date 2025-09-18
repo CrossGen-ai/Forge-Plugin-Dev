@@ -1,85 +1,222 @@
-# Obsidian AI Agent
+# Obsidian AI CLI
 
-https://github.com/user-attachments/assets/3b251604-cf52-4f38-8c9d-fba67e280b64
+An Obsidian plugin that integrates multiple AI CLI tools directly into your workspace. Execute AI commands through convenient sidebar panels while automatically passing file context and selected text.
 
-Bring AI agents directly into your Obsidian vault. This plugin integrates AI agent CLIs (currently Claude Code) seamlessly with Obsidian - allowing you to chat with AI, edit files, and manage your knowledge base without leaving your workspace.
+![Example 1](images/example1.gif)
 
-## Why?
-
-Working with AI shouldn't break your flow or lose context about your vault. 
-
-This plugin aims to keep Claude context-aware of your Obsidian environment while letting you stay in your workspace instead of switching to terminal. It also has some magics 🪄  to help you manage context more effectively.
-
-See the [roadmap](#roadmap) for upcoming features I'm looking to incorporate.
+**Supported AI Tools:**
+- Claude Code CLI
+- Gemini CLI
+- OpenAI Codex
+- Qwen Code
 
 ## Features
 
-- **Direct AI integration**: Chat with Claude Code directly in Obsidian's interface
-- **File-first approach**: AI agents can read, edit, and create files in your vault
-- **Context-aware**: Automatically includes relevant vault context in conversations
-- **Real-time collaboration**: See AI edits happen live in your Obsidian interface
-- **"Bash is all you need" + "files over apps" = <3**: Claude's "bash is all you need" philosophy aligns perfectly with Obsidian's "files over apps" approach — no proprietary formats or magics, just direct file editing
+- **Multi-AI Integration**: Access Claude Code, Gemini CLI, OpenAI Codex, and Qwen Code from dedicated sidebar panels
+- **Automatic Context Passing**: Current file and selected text are automatically included in prompts
+- **File Reference Support**: Use `@filename.md` syntax to reference other files in your vault
+- **Split Output Display**: Clean result view with collapsible command execution details
+- **Real-time Streaming**: See AI responses as they're generated
+- **Custom Icons**: Distinctive icons for each AI tool in the sidebar
+
+## Donate
+
+If you find this plugin helpful, consider supporting its development:
+
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/blackdragonbe)
+
+## Prerequisites
+
+Before using this plugin, you need to have the CLI tools installed:
+
+### Claude Code CLI
+- Install from: https://claude.ai/code
+- Ensure it's accessible via the `claude` command in your terminal
+- Test with: `claude --version`
+
+### Gemini CLI (Optional)
+- Install the Gemini CLI tool
+- Ensure it's accessible via the `gemini` command in your terminal  
+- Test with: `gemini --version`
+
+### OpenAI Codex (Optional)
+- Install the OpenAI Codex CLI tool
+- Ensure it's accessible via the `codex` command in your terminal
+- Test with: `codex --version`
+
+### Qwen Code (Optional)
+- Install the Qwen Code CLI tool
+- Ensure it's accessible via the `qwen` command in your terminal
+- Test with: `qwen --version`
 
 ## Installation
 
-### Prerequisites
-- **Node.js** - Required for plugin execution
-- **Claude Code CLI** - Get it from [Anthropic's Claude Code](https://www.anthropic.com/claude-code)
+### Option 1: Manual Installation (Recommended for Development)
 
-### Setup
+1. Clone or download this repository
+2. Copy the plugin folder to your Obsidian vault's plugins directory:
+   ```
+   YourVault/.obsidian/plugins/Obsidian-AI-CLI/
+   ```
+3. Navigate to the plugin directory and build:
+   ```bash
+   cd YourVault/.obsidian/plugins/Obsidian-AI-CLI/
+   npm install
+   npm run build
+   ```
+4. In Obsidian, go to Settings → Community Plugins
+5. Enable "Obsidian AI CLI"
 
-*Coming soon to the Obsidian community plugin store*
+### Option 2: BRAT Installation (Recommended for regular use)
 
-1. **Verify CLI access**: Ensure you can run `claude` in your terminal
-2. **Download**: Get the latest release (`obsidian-ai-agent.zip`) from the [releases page](../../releases)
-3. **Install**: Extract from the `obsidian-ai-agent.zip` and place the folder in `[your_vault]/.obsidian/plugins/obsidian-ai-agent`
-4. **Enable**: Activate the plugin in Obsidian's Community Plugins settings
-5. **Start chatting**: Use the AI Agent panel in your workspace right-sidebar
+1. Install the BRAT plugin from the Community Plugins store
+2. Add this repository URL to BRAT
+3. Install and enable the plugin
 
-> [!WARNING]
-> **Preview version notice**
-> 
-> This plugin is in active development and will modify files in your vault. It currently uses elevated permissions (`--permission-mode bypassPermissions` and `dangerously-skip-permissions`) for full functionality. 
-> 
-> **Recommended**: Back up your vault before use. Fine-grained permission controls are planned for future releases.
+## Setup
+
+### 1. Configure CLI Paths
+
+1. Go to Settings → Community Plugins → Obsidian AI CLI → Options
+2. Set the paths for your CLI tools:
+   - **Claude Code Path**: Usually `claude` (if in PATH) or full path to executable
+   - **Gemini CLI Path**: Usually `gemini` (if in PATH) or full path to executable
+   - **OpenAI Codex Path**: Usually `codex` (if in PATH) or full path to executable
+   - **Qwen Code Path**: Usually `qwen` (if in PATH) or full path to executable
+3. Use the "Test" buttons to verify each tool is working
+
+### 2. Open Sidebar Panels
+
+Use the command palette (Ctrl/Cmd + P) and search for:
+- "Claude Code" - Opens the Claude Code sidebar panel
+- "Gemini CLI" - Opens the Gemini CLI sidebar panel
+- "OpenAI Codex" - Opens the OpenAI Codex sidebar panel
+- "Qwen Code" - Opens the Qwen Code sidebar panel
+
+Or use the sidebar icons that appear after enabling the plugin.
+
+## Usage
+
+### Basic Usage
+
+![Example 2](images/example2.gif)
+
+1. **Open a file** and/or **select text** you want to work with
+2. **Open a sidebar panel** (Claude Code, Gemini CLI, OpenAI Codex, or Qwen Code)
+3. **Enter your prompt** in the text area
+4. **Click Run** to execute
+
+The plugin automatically:
+- Detects your current file and adds it as `@filename.md`
+- Includes selected text as context
+- Displays the AI response in the "Result" section
+- Shows command execution details and full prompt content in the collapsible section
+- Uses stdin for robust handling of complex text with special characters
+
+### Advanced Features
+
+#### File References
+Reference other files in your prompts using `@` syntax:
+```
+Summarize the main points from @meeting-notes.md and @project-plan.md
+```
+
+#### Context Display
+The "Context" section shows:
+- 📄 Current file being referenced
+- ✏️ Selected text (if any)
+
+#### Split Output
+- **Result**: Clean AI response, always visible
+- **Command Execution**: Technical details, collapsed by default
+
+### Example Prompts
+
+- `Translate the selected text to French`
+- `Fix grammar and spelling in this document`
+- `Summarize the key points from @project-notes.md`
+- `Create a todo list based on this meeting transcript`
+- `Explain this code and suggest improvements`
 
 ## Troubleshooting
 
-### CLI issues
-**Can't find Node.js or Claude CLI?**
+### CLI Tool Not Found
+**Error**: "CLI tool not found. Check the path in settings."
 
-1. **Verify installations**: Run `node --version` and `claude --version` in your terminal
-2. **Manual configuration**: If auto-detection fails, set paths manually in **Settings > Community Plugins > Obsidian AI Agent**
+**Solutions**:
+1. Verify the CLI tool is installed and working in your terminal
+2. Check the path in plugin settings
+3. Try using the full path to the executable instead of just the command name
+4. Restart Obsidian after changing settings
 
-**Find executable paths:**
-```bash
-# Node.js location
-which node
+### No Context Detected
+**Issue**: Plugin doesn't detect current file or selection
 
-# Claude CLI location
-echo "$(sed -n 's/^exec "\([^"]*\)".*/\1/p' $(which claude))"
+**Solutions**:
+1. Click in the prompt text area to refresh context
+2. Try switching to another file and back
+3. Ensure you're in a markdown view (not reading mode)
+
+### Gemini Shows "Loaded cached credentials"
+This is automatically filtered out in the Result section but remains visible in Command Execution for debugging.
+
+### Icons Not Showing
+1. Disable and re-enable the plugin
+2. Restart Obsidian
+3. Check the browser console for any errors
+
+## Configuration
+
+### Settings Options
+
+- **Claude Code Path**: Path to Claude Code CLI executable
+- **Gemini CLI Path**: Path to Gemini CLI executable
+- **OpenAI Codex Path**: Path to OpenAI Codex CLI executable
+- **Qwen Code Path**: Path to Qwen Code CLI executable
+
+### File Structure
+```
+.obsidian/plugins/Obsidian-AI-CLI/
+├── main.ts          # Main plugin code
+├── manifest.json    # Plugin metadata
+├── versions.json    # Version history
+├── package.json     # Dependencies
+├── CLAUDE.md        # Development notes
+└── README.md        # This file
 ```
 
-**Windows users**: Claude must be installed in WSL. Windows support is still being tested.
+## Development
 
-### Debug mode
-**Enable detailed logging:**
-1. Go to **Settings > Community Plugins > Obsidian AI Agent**
-2. Enable "Debugging" to see detailed logs
-3. Open Developer Console: `Cmd+Opt+I` (Mac) or `Ctrl+Shift+I` (Windows/Linux)
+### Building from Source
+```bash
+npm install
+npm run dev    # Development build with watch
+npm run build  # Production build
+```
 
-## Roadmap
+### Architecture Notes
+- **Unified View System**: Single `ToolView` class handles all AI tools
+- **Context Detection**: Multiple fallback methods for file/selection detection
+- **Process Management**: Node.js spawn with proper cleanup and stdin handling
+- **Real-time Streaming**: Live output updates during execution
+- **Robust Input Handling**: All prompts use stdin to avoid shell escaping issues
+- **Enhanced Logging**: Full visibility into prompt content and execution details
 
-### Core features
-- [ ] **Model selection** - Choose between different Claude models
-- [ ] **Interaction modes** - Write mode, plan mode, and custom workflows
-- [ ] **Custom system messages** - Personalize AI behavior for your use case
-- [ ] **Permission controls** - Fine-grained file access and editing permissions
-- [ ] **Cross-platform support** - Enhanced Windows/WSL compatibility
+## Support
 
-### Obsidian integration
-- [ ] **Context menu integration** - "Add to AI context" from file explorer
-- [ ] **File linking** - Open the files that were read/edited by your model
-- [ ] **Selection-based context** - Include selected text in conversations
-- [ ] **Enhanced copy/paste** - Smart context copy/paste (similar to Cursor)
-- [ ] **Quick commands** - Quick commands for sending re-usable context to your AI
+For issues, feature requests, or questions:
+1. Check this README and troubleshooting section
+2. Look for error messages in the browser console (F12)
+3. Create an issue with detailed information about your setup
+
+## License
+
+Copyright (C) 2025 by BlackDragonBE
+
+This plugin is licensed for non-commercial use only. You may use, copy, modify, and distribute this software for non-commercial purposes, provided that you give proper attribution to the original author (BlackDragonBE). Commercial use requires explicit written permission.
+
+See the [LICENSE](LICENSE) file for full license terms.
+
+---
+
+Made with ❤️ for the Obsidian community
