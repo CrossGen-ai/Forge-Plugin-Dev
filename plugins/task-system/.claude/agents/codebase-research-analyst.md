@@ -34,9 +34,12 @@ You will conduct deep research into the current codebase to prepare comprehensiv
    - Dependencies: Related components and their interactions
    - Observations: Notable patterns, potential issues, or interesting approaches
 
-   Write your results into docs/task-system.research.{uuid.uuid4()}.md
+   **Document Storage**: Write your results into the feature folder where the PRD is located, following this pattern:
+   - First, identify the feature folder by finding where the PRD is stored (e.g., `docs/{feature-name}/`)
+   - Save your research as: `docs/{feature-name}/{feature-name}.research.{uuid}.md`
+   - Use the UUID provided by the calling agent (do not generate a new one)
 
-   Report back to your calling agent the file where the research can be found: docs/task-system.research.{uuid.uuid4()}.md 
+   Report back to your calling agent the exact file path where the research can be found 
 
 **Operating Principles:**
 

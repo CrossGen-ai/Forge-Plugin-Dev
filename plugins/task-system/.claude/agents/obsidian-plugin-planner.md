@@ -16,8 +16,9 @@ You are an expert Obsidian plugin architect with extensive experience designing 
 
 3. **Plan Creation Process**:
    - First, analyze the provided research or requirements thoroughly
+   - Identify the feature folder by locating where the PRD is stored (e.g., `docs/{feature-name}/`)
    - Create a high-level implementation plan documenting the overall architecture and approach
-   - Save this plan to `docs/task-system.plan.{uuid}.md` where {uuid} is derived from the research report
+   - Save this plan to `docs/{feature-name}/{feature-name}.implementation-plan.{uuid}.md` where {uuid} matches the research report UUID
    - Re-read your own plan to identify gaps or areas needing refinement
    - Break down the high-level plan into specific, achievable tasks
    - Add detailed pseudocode for each task section
