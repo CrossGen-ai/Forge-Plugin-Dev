@@ -4,19 +4,33 @@ import { ValidationResult } from '../schema/schema.validator';
 export class NotificationManager {
     static showValidationWarnings(filename: string, result: ValidationResult): void {
         if (result.errors.length > 0) {
-            const errorMessages = result.errors.map(e => `• ${e.message}`).join('\n');
+            const errorCount = result.errors.length;
             new Notice(
-                `Schema validation failed for "${filename}":\n${errorMessages}`,
-                10000 // 10 second duration
+                `Schema validation failed for "${filename}" - ${errorCount} error${errorCount > 1 ? 's' : ''}`,
+                8000
             );
+
+            // Show first few errors as separate notices
+            result.errors.slice(0, 3).forEach((error, index) => {
+                setTimeout(() => {
+                    new Notice(`Error: ${error.field} - ${error.message}`, 6000);
+                }, index * 1000);
+            });
         }
 
         if (result.warnings.length > 0) {
-            const warningMessages = result.warnings.map(w => `• ${w.message}`).join('\n');
+            const warningCount = result.warnings.length;
             new Notice(
-                `Schema warnings for "${filename}":\n${warningMessages}`,
-                5000 // 5 second duration
+                `Schema warnings for "${filename}" - ${warningCount} warning${warningCount > 1 ? 's' : ''}`,
+                5000
             );
+
+            // Show first warning as separate notice
+            if (result.warnings[0]) {
+                setTimeout(() => {
+                    new Notice(`Warning: ${result.warnings[0].field} - ${result.warnings[0].message}`, 4000);
+                }, 500);
+            }
         }
     }
 
@@ -63,7 +77,13 @@ export class NotificationManager {
     }
 
     static createDetailedNotice(title: string, details: string[], duration = 8000): void {
-        const content = [title, ...details].join('\n');
-        new Notice(content, duration);
+        new Notice(title, duration);
+
+        // Show details as separate notices with slight delay
+        details.slice(0, 3).forEach((detail, index) => {
+            setTimeout(() => {
+                new Notice(detail, Math.max(3000, duration - 2000));
+            }, (index + 1) * 800);
+        });
     }
 }

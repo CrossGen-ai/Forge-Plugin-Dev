@@ -28,7 +28,7 @@ export class SchemaValidator {
         };
 
         // First check if this is an atomic note
-        if (!frontmatter.atomic_note) {
+        if (!frontmatter['atomic-task']) {
             return result; // Not an atomic note, no validation needed
         }
 
@@ -57,11 +57,11 @@ export class SchemaValidator {
     }
 
     private static validateFieldTypes(frontmatter: Record<string, any>, result: ValidationResult): void {
-        // Validate atomic_note is boolean
-        if (frontmatter.atomic_note !== undefined && typeof frontmatter.atomic_note !== 'boolean') {
+        // Validate atomic-task is boolean
+        if (frontmatter['atomic-task'] !== undefined && typeof frontmatter['atomic-task'] !== 'boolean') {
             result.errors.push({
-                field: 'atomic_note',
-                message: 'atomic_note must be a boolean (true or false)',
+                field: 'atomic-task',
+                message: 'atomic-task must be a boolean (true or false)',
                 severity: 'error'
             });
             result.isValid = false;

@@ -184,7 +184,7 @@ export class FileEventHandler {
             const frontmatter = await this.frontmatterReader.readFrontmatter(activeFile) || {};
 
             // Set as atomic note
-            frontmatter.atomic_note = true;
+            frontmatter['atomic-task'] = true;
 
             // Assign defaults
             const updatedFrontmatter = DefaultValueAssigner.assignDefaults(

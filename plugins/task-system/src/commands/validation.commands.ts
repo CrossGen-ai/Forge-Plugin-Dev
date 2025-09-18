@@ -1,3 +1,4 @@
+import { Notice } from 'obsidian';
 import type TaskSystemPlugin from '../main';
 
 export class ValidationCommands {
@@ -43,7 +44,7 @@ export class ValidationCommands {
                 await plugin.saveSettings();
 
                 const status = plugin.settings.enableValidation ? 'enabled' : 'disabled';
-                plugin.app.workspace.trigger('notice', `Schema validation ${status}`);
+                new Notice(`Schema validation ${status}`);
             }
         });
 
@@ -56,7 +57,7 @@ export class ValidationCommands {
                 await plugin.saveSettings();
 
                 const status = plugin.settings.autoPopulateDefaults ? 'enabled' : 'disabled';
-                plugin.app.workspace.trigger('notice', `Auto-populate defaults ${status}`);
+                new Notice(`Auto-populate defaults ${status}`);
             }
         });
     }

@@ -20,7 +20,7 @@ export class FrontmatterReader {
     }
 
     isAtomicNote(frontmatter: Record<string, any>): boolean {
-        return frontmatter?.atomic_note === true;
+        return frontmatter?.['atomic-task'] === true;
     }
 
     async isFileAtomicNote(file: TFile): Promise<boolean> {

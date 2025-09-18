@@ -29,9 +29,10 @@ export default class TaskSystemPlugin extends Plugin {
         this.addSettingTab(new TaskSystemSettingTab(this.app, this));
 
         // Add ribbon icon
-        this.addRibbonIcon('list-checks', 'Atomic Task Schema Enforcer', () => {
+        const ribbonIconEl = this.addRibbonIcon('list-checks', 'Atomic Task Schema Enforcer', () => {
             this.fileEventHandler.validateCurrentFile();
         });
+        ribbonIconEl.addClass('task-system-ribbon');
 
         Logger.info('Atomic Task Schema Enforcer plugin loaded successfully');
     }

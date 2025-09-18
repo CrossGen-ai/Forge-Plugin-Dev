@@ -124,14 +124,14 @@ interface FrontmatterHandler {
 **Required Implementation:**
 Based on PRD requirements, needs:
 - Schema definition for atomic task fields
-- Validation for required fields (atomic_note, title, created_date, status)
+- Validation for required fields (atomic-task, title, created_date, status)
 - Type checking for dates, enums, and lists
 - Default value assignment logic
 
 **Schema Structure Needed:**
 ```typescript
 interface AtomicTaskSchema {
-    atomic_note: boolean;        // Required
+    atomic-task: boolean;        // Required
     title: string;              // Required  
     created_date: string;       // Required (ISO date)
     status: TaskStatus;         // Required (enum)
@@ -218,7 +218,7 @@ interface TaskSystemSettings {
 - No metadata processing logic
 
 **Implementation Requirements:**
-- Atomic note detection logic (`atomic_note: true` in frontmatter)
+- Atomic note detection logic (`atomic-task: true` in frontmatter)
 - Task metadata management
 - Default value assignment (created_date, status, title)
 - Validation and warning systems

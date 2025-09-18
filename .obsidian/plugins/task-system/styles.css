@@ -1,34 +1,77 @@
 /*
-Task System Plugin Styles
+Atomic Task Schema Enforcer Plugin Styles
 */
 
 /* Ribbon icon styling */
-.my-plugin-ribbon-class {
-    color: #00bcd4 !important; /* Cyan color for testing CSS watcher */
-}
-
-/* Alternative: Target the SVG directly for more control */
-.my-plugin-ribbon-class svg {
-    color: #00bcd4 !important;
-    fill: currentColor;
-}
-
-/* Hover effect */
-.my-plugin-ribbon-class:hover {
-    color: #ff5252 !important; /* Darker red on hover */
-}
-
-/* You can also use CSS variables for consistency with Obsidian themes */
-.my-plugin-ribbon-class.theme-aware {
+.task-system-ribbon {
     color: var(--color-accent) !important;
 }
 
-/* For different states */
-.my-plugin-ribbon-class.active {
-    color: #4caf50 !important; /* Green when active */
+.task-system-ribbon:hover {
+    color: var(--color-accent-hover) !important;
 }
 
-.my-plugin-ribbon-class.disabled {
-    color: #9e9e9e !important; /* Gray when disabled */
-    opacity: 0.5;
+/* Settings page styling */
+.schema-info {
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    padding: 12px;
+    margin-top: 16px;
+}
+
+.schema-info p {
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.schema-info ul {
+    margin-left: 16px;
+    margin-bottom: 12px;
+}
+
+.schema-info li {
+    margin-bottom: 4px;
+    font-family: var(--font-monospace);
+    font-size: 0.9em;
+}
+
+/* Validation status indicators */
+.task-validation-valid {
+    color: var(--color-green);
+}
+
+.task-validation-warning {
+    color: var(--color-orange);
+}
+
+.task-validation-error {
+    color: var(--color-red);
+}
+
+/* Notice styling improvements */
+.notice {
+    max-width: 400px;
+}
+
+/* File explorer decorations (for future use) */
+.nav-file-title[data-task-validation="valid"]::after {
+    content: "✓";
+    color: var(--color-green);
+    margin-left: 4px;
+    font-size: 0.8em;
+}
+
+.nav-file-title[data-task-validation="warning"]::after {
+    content: "⚠";
+    color: var(--color-orange);
+    margin-left: 4px;
+    font-size: 0.8em;
+}
+
+.nav-file-title[data-task-validation="error"]::after {
+    content: "✗";
+    color: var(--color-red);
+    margin-left: 4px;
+    font-size: 0.8em;
 }

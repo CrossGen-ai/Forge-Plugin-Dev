@@ -55,7 +55,7 @@ export class DefaultValueAssigner {
     }
 
     static hasRequiredFields(frontmatter: Record<string, any>): boolean {
-        const requiredFields = ['atomic_note', 'title', 'created_date', 'status'];
+        const requiredFields = ['atomic-task', 'title', 'created_date', 'status'];
         return requiredFields.every(field =>
             frontmatter.hasOwnProperty(field) &&
             frontmatter[field] !== null &&
@@ -65,7 +65,7 @@ export class DefaultValueAssigner {
     }
 
     static getMissingRequiredFields(frontmatter: Record<string, any>): string[] {
-        const requiredFields = ['atomic_note', 'title', 'created_date', 'status'];
+        const requiredFields = ['atomic-task', 'title', 'created_date', 'status'];
         return requiredFields.filter(field =>
             !frontmatter.hasOwnProperty(field) ||
             frontmatter[field] === null ||

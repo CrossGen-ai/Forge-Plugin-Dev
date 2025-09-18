@@ -3,6 +3,7 @@
     "aliases": "aliases",
     "cssclasses": "multitext",
     "tags": "tags",
-    "PRD": "checkbox"
+    "PRD": "checkbox",
+    "atomic-task": "checkbox"
   }
 }

@@ -1,5 +1,5 @@
 export interface AtomicTaskSchema {
-    atomic_note: boolean;        // Required
+    'atomic-task': boolean;        // Required
     title: string;              // Required
     created_date: string;       // Required (ISO date)
     status: TaskStatus;         // Required
@@ -13,7 +13,7 @@ export interface AtomicTaskSchema {
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done';
 export type Priority = 'low' | 'medium' | 'high';
 
-export const REQUIRED_FIELDS = ['atomic_note', 'title', 'created_date', 'status'] as const;
+export const REQUIRED_FIELDS = ['atomic-task', 'title', 'created_date', 'status'] as const;
 
 export const DEFAULT_VALUES = {
     status: 'todo' as TaskStatus,
@@ -34,7 +34,7 @@ export interface SchemaField {
 }
 
 export const SCHEMA_FIELDS: SchemaField[] = [
-    { name: 'atomic_note', type: 'boolean', required: true },
+    { name: 'atomic-task', type: 'boolean', required: true },
     { name: 'title', type: 'string', required: true },
     { name: 'created_date', type: 'date', required: true },
     { name: 'status', type: 'enum', required: true, enumValues: VALID_STATUS_VALUES, defaultValue: 'todo' },

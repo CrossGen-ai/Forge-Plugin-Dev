@@ -8,7 +8,7 @@ Users need consistency in how “atomic tasks” are defined in their vault so t
 
 **3. Scope for v1**
 
-- Only deals with markdown files that have `atomic_note: true` in their YAML frontmatter.
+- Only deals with markdown files that have `atomic-task: true` in their YAML frontmatter.
     
 - Flat schema (no nested objects).
     
@@ -26,7 +26,7 @@ Required frontmatter keys and their types/defaults:
 
 |Key|Type|Required|Default (if missing)|Allowed values / notes|
 |---|---|---|---|---|
-|atomic_note|boolean|**Yes**|_none_ (user must explicitly set; or default to false)|`true` or `false`|
+|atomic-task|boolean|**Yes**|_none_ (user must explicitly set; or default to false)|`true` or `false`|
 |title|string|**Yes**|file name (without extension)|non-empty|
 |created_date|date|**Yes**|current date (on first save or when plugin detects note becomes atomic)|e.g. ISO YYYY-MM-DD|
 |status|enum (string)|**Yes**|`todo`|values: `todo`, `in_progress`, `blocked`, `done`|

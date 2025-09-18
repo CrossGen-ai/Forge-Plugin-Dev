@@ -142,7 +142,7 @@ export class TaskSystemSettingTab extends PluginSettingTab {
         const schemaInfo = containerEl.createDiv('schema-info');
         schemaInfo.createEl('p', { text: 'Required fields for atomic tasks:' });
         const requiredList = schemaInfo.createEl('ul');
-        ['atomic_note (boolean)', 'title (string)', 'created_date (date)', 'status (enum)'].forEach(field => {
+        ['atomic-task (boolean)', 'title (string)', 'created_date (date)', 'status (enum)'].forEach(field => {
             requiredList.createEl('li', { text: field });
         });
 

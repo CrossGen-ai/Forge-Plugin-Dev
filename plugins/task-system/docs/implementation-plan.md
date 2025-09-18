@@ -4,7 +4,7 @@ Date: 2025-09-17
 
 ## Executive Summary
 
-This plan details the implementation of the Atomic Task Schema Enforcer plugin for Obsidian. The plugin will enforce frontmatter schema for files marked with `atomic_note: true`, providing real-time validation, auto-population of missing fields, and user-friendly warnings. The implementation will transform the current template codebase into a fully functional schema enforcement system.
+This plan details the implementation of the Atomic Task Schema Enforcer plugin for Obsidian. The plugin will enforce frontmatter schema for files marked with `atomic-task: true`, providing real-time validation, auto-population of missing fields, and user-friendly warnings. The implementation will transform the current template codebase into a fully functional schema enforcement system.
 
 **Key Features:**
 - Real-time frontmatter validation for atomic task notes
@@ -103,7 +103,7 @@ npm install --save-dev @types/js-yaml@^4.0.5
 ```typescript
 // src/schema/schema.definition.ts
 export interface AtomicTaskSchema {
-    atomic_note: boolean;        // Required
+    atomic-task: boolean;        // Required
     title: string;              // Required
     created_date: string;       // Required (ISO date)
     status: TaskStatus;         // Required
@@ -117,7 +117,7 @@ export interface AtomicTaskSchema {
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done';
 export type Priority = 'low' | 'medium' | 'high';
 
-export const REQUIRED_FIELDS = ['atomic_note', 'title', 'created_date', 'status'];
+export const REQUIRED_FIELDS = ['atomic-task', 'title', 'created_date', 'status'];
 export const DEFAULT_VALUES = {
     status: 'todo',
     priority: 'medium',
@@ -154,7 +154,7 @@ export class FrontmatterReader {
     }
 
     static isAtomicNote(frontmatter: Record<string, any>): boolean {
-        return frontmatter?.atomic_note === true;
+        return frontmatter?.atomic-task === true;
     }
 }
 ```
@@ -652,7 +652,7 @@ export class DebounceManager {
 - **Debouncing**: Prevent excessive validation on rapid file changes
 - **Lazy Loading**: Initialize components only when needed
 - **Memory Management**: Proper cleanup of event listeners and timers
-- **File Filtering**: Only process markdown files with atomic_note: true
+- **File Filtering**: Only process markdown files with atomic-task: true
 
 ### Error Handling Strategy
 - **Graceful Degradation**: Continue operation even if validation fails
@@ -730,7 +730,7 @@ src/
 - Full validation workflow (read → validate → auto-populate → write)
 
 ### Manual Testing Scenarios
-1. Create new markdown file, add `atomic_note: true`
+1. Create new markdown file, add `atomic-task: true`
 2. Modify existing atomic task file with invalid schema
 3. Test all settings combinations
 4. Test performance with many files
@@ -782,7 +782,7 @@ src/
 ## Success Criteria
 
 ### Core Functionality
-- [x] Plugin correctly identifies atomic task files (`atomic_note: true`)
+- [x] Plugin correctly identifies atomic task files (`atomic-task: true`)
 - [x] Schema validation works for all defined field types
 - [x] Auto-population of missing required fields functions correctly
 - [x] Real-time monitoring responds to file changes within 500ms
