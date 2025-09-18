@@ -1130,7 +1130,7 @@ class ToolView extends ItemView {
 			prompt = await this.plugin.expandFileReferences(prompt);
 			
 			const commandInfo = this.buildCommand(prompt);
-			const vaultPath = (this.plugin.app.vault.adapter as any).basePath || (this.plugin.app.vault.adapter as any).path;
+			const vaultPath = (this.plugin.app.vault.adapter as any).basePath || (this.plugin.app.vault.adapter as any).path || process.cwd();
 			
 			let executionText = `Full command being executed:\n${commandInfo.command}\n`;
 			
