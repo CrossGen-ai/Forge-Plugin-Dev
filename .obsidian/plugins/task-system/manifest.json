@@ -1,9 +1,9 @@
 {
 	"id": "task-system",
-	"name": "Task System",
+	"name": "Atomic Task Schema Enforcer",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "A new Obsidian plugin: task system",
+	"description": "Enforces frontmatter schema for atomic task notes with auto-population and validation",
 	"author": "",
 	"authorUrl": "",
 	"fundingUrl": "",
