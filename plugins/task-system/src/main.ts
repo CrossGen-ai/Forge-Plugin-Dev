@@ -1,5 +1,5 @@
 import { Plugin } from 'obsidian';
-import { TaskSystemSettings, DEFAULT_SETTINGS } from './settings/settings.interface';
+import { TaskSystemSettings, DEFAULT_SETTINGS, DEFAULT_CUSTOM_SCHEMA_FIELDS } from './settings/settings.interface';
 import { TaskSystemSettingTab } from './settings/settings.tab';
 import { FileEventHandler } from './events/file.events';
 import { ValidationCommands } from './commands/validation.commands';
@@ -48,7 +48,42 @@ export default class TaskSystemPlugin extends Plugin {
 
     async loadSettings() {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+
+        // Migration logic: Ensure custom schema fields are initialized
+        await this.migrateSettings();
+
         Logger.debug('Settings loaded:', this.settings);
+    }
+
+    /**
+     * Migrate settings to ensure compatibility with dynamic schema system
+     */
+    private async migrateSettings(): Promise<void> {
+        let migrationNeeded = false;
+
+        // Initialize customSchemaFields if it doesn't exist or is empty
+        if (!Array.isArray(this.settings.customSchemaFields) || this.settings.customSchemaFields.length === 0) {
+            this.settings.customSchemaFields = [...DEFAULT_CUSTOM_SCHEMA_FIELDS];
+            migrationNeeded = true;
+            Logger.info('Migrated settings: Added default custom schema fields');
+        }
+
+        // Check if we need to update existing default fields to match new structure
+        const defaultFieldKeys = DEFAULT_CUSTOM_SCHEMA_FIELDS.map(f => f.key);
+        const existingFieldKeys = this.settings.customSchemaFields.map(f => f.key);
+
+        for (const defaultField of DEFAULT_CUSTOM_SCHEMA_FIELDS) {
+            if (!existingFieldKeys.includes(defaultField.key)) {
+                this.settings.customSchemaFields.push({ ...defaultField });
+                migrationNeeded = true;
+                Logger.info(`Migrated settings: Added missing default field "${defaultField.key}"`);
+            }
+        }
+
+        // Save migrated settings
+        if (migrationNeeded) {
+            await this.saveSettings();
+        }
     }
 
     async saveSettings() {

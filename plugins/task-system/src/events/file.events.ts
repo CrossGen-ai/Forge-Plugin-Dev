@@ -112,7 +112,7 @@ export class FileEventHandler {
         // Only validate if we haven't just updated (to avoid immediate re-validation)
         // or if validation is explicitly enabled and we didn't auto-populate
         if (!wasUpdated && this.plugin.settings.enableValidation) {
-            const validationResult = SchemaValidator.validate(frontmatter);
+            const validationResult = SchemaValidator.validate(frontmatter, this.plugin.settings.customSchemaFields);
 
             if (!validationResult.isValid || validationResult.warnings.length > 0) {
                 Logger.debug(`Validation issues found for ${file.name}:`, validationResult);
@@ -155,7 +155,7 @@ export class FileEventHandler {
                 return false;
             }
 
-            const validationResult = SchemaValidator.validate(frontmatter);
+            const validationResult = SchemaValidator.validate(frontmatter, this.plugin.settings.customSchemaFields);
 
             if (validationResult.isValid && validationResult.warnings.length === 0) {
                 NotificationManager.showSuccessMessage(activeFile.name);

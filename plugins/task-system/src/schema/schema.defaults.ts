@@ -1,6 +1,6 @@
-import { DEFAULT_VALUES } from './schema.definition';
+import { getCombinedSchemaFields } from './schema.definition';
 import { DateUtils } from '../utils/date.utils';
-import { TaskSystemSettings } from '../settings/settings.interface';
+import type { TaskSystemSettings, CustomSchemaField } from '../settings/settings.interface';
 
 export class DefaultValueAssigner {
     static assignDefaults(
@@ -31,33 +31,45 @@ export class DefaultValueAssigner {
 
         // Set default status if missing
         if (!updated.status || updated.status === '') {
-            updated.status = settings.defaultStatus || DEFAULT_VALUES.status;
+            updated.status = settings.defaultStatus || 'todo';
         }
 
-        // Set default priority if missing and auto-populate is enabled
-        if ((!updated.priority || updated.priority === '') && this.shouldSetDefaultPriority(settings)) {
-            updated.priority = settings.defaultPriority || DEFAULT_VALUES.priority;
-        }
+        // Apply defaults from custom schema fields
+        this.applyCustomFieldDefaults(updated, settings.customSchemaFields, settings);
 
-        // Initialize empty arrays for tags and dependencies if missing
-        if (!Array.isArray(updated.tags)) {
-            updated.tags = DEFAULT_VALUES.tags;
-        }
-
-        if (!Array.isArray(updated.dependencies)) {
-            updated.dependencies = DEFAULT_VALUES.dependencies;
-        }
-
-        // Normalize all date fields to string format
-        const dateFields = ['due_date', 'completed_date'];
-        dateFields.forEach(field => {
-            if (updated[field] && updated[field] instanceof Date) {
-                updated[field] = DateUtils.formatDate(updated[field]);
-                console.log(`[TaskSystem] Normalized ${field} from Date object to string: ${updated[field]} for file: ${filename}`);
+        // Normalize all date fields to string format for custom fields
+        settings.customSchemaFields.forEach(field => {
+            if (field.type === 'date' && updated[field.key] && updated[field.key] instanceof Date) {
+                updated[field.key] = DateUtils.formatDate(updated[field.key]);
+                console.log(`[TaskSystem] Normalized ${field.key} from Date object to string: ${updated[field.key]} for file: ${filename}`);
             }
         });
 
         return updated;
+    }
+
+    /**
+     * Apply default values from custom schema fields
+     */
+    private static applyCustomFieldDefaults(
+        frontmatter: Record<string, any>,
+        customFields: CustomSchemaField[],
+        settings: TaskSystemSettings
+    ): void {
+        if (!settings.autoPopulateDefaults) {
+            return;
+        }
+
+        customFields.forEach(field => {
+            // Only apply default if field is missing or empty and has a default value
+            if (field.defaultValue !== undefined &&
+                (!frontmatter.hasOwnProperty(field.key) ||
+                 frontmatter[field.key] === null ||
+                 frontmatter[field.key] === undefined ||
+                 frontmatter[field.key] === '')) {
+                frontmatter[field.key] = field.defaultValue;
+            }
+        });
     }
 
     private static extractTitleFromFilename(filename: string): string {
@@ -72,8 +84,8 @@ export class DefaultValueAssigner {
         return settings.autoPopulateDefaults;
     }
 
-    static hasRequiredFields(frontmatter: Record<string, any>): boolean {
-        const requiredFields = ['atomic-task', 'title', 'created_date', 'status'];
+    static hasRequiredFields(frontmatter: Record<string, any>, customFields: CustomSchemaField[] = []): boolean {
+        const requiredFields = this.getRequiredFieldNames(customFields);
         return requiredFields.every(field =>
             frontmatter.hasOwnProperty(field) &&
             frontmatter[field] !== null &&
@@ -82,13 +94,19 @@ export class DefaultValueAssigner {
         );
     }
 
-    static getMissingRequiredFields(frontmatter: Record<string, any>): string[] {
-        const requiredFields = ['atomic-task', 'title', 'created_date', 'status'];
+    static getMissingRequiredFields(frontmatter: Record<string, any>, customFields: CustomSchemaField[] = []): string[] {
+        const requiredFields = this.getRequiredFieldNames(customFields);
         return requiredFields.filter(field =>
             !frontmatter.hasOwnProperty(field) ||
             frontmatter[field] === null ||
             frontmatter[field] === undefined ||
             frontmatter[field] === ''
         );
+    }
+
+    private static getRequiredFieldNames(customFields: CustomSchemaField[]): string[] {
+        const coreRequired = ['atomic-task', 'title', 'created_date', 'status'];
+        const customRequired = customFields.filter(f => f.required).map(f => f.key);
+        return [...coreRequired, ...customRequired];
     }
 }

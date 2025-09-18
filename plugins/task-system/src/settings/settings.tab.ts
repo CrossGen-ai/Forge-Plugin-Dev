@@ -1,5 +1,6 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
-import { VALID_STATUS_VALUES, VALID_PRIORITY_VALUES } from '../schema/schema.definition';
+import { App, PluginSettingTab, Setting, Modal, TextComponent, DropdownComponent } from 'obsidian';
+import { VALID_STATUS_VALUES, VALID_PRIORITY_VALUES, CORE_SCHEMA_FIELDS } from '../schema/schema.definition';
+import type { CustomSchemaField } from './settings.interface';
 import type TaskSystemPlugin from '../main';
 
 export class TaskSystemSettingTab extends PluginSettingTab {
@@ -136,20 +137,302 @@ export class TaskSystemSettingTab extends PluginSettingTab {
                 })
             );
 
-        // Add some helpful information
-        containerEl.createEl('h3', { text: 'Schema Information' });
+        // Schema Configuration Section
+        containerEl.createEl('h3', { text: 'Schema Configuration' });
 
-        const schemaInfo = containerEl.createDiv('schema-info');
-        schemaInfo.createEl('p', { text: 'Required fields for atomic tasks:' });
-        const requiredList = schemaInfo.createEl('ul');
-        ['atomic-task (boolean)', 'title (string)', 'created_date (date)', 'status (enum)'].forEach(field => {
-            requiredList.createEl('li', { text: field });
+        // Core fields information
+        const coreInfo = containerEl.createDiv('core-fields-info');
+        coreInfo.createEl('p', { text: 'Core required fields (cannot be modified):' });
+        const coreList = coreInfo.createEl('ul');
+        CORE_SCHEMA_FIELDS.forEach(field => {
+            const label = `${field.displayName || field.name} (${field.type}${field.required ? ', required' : ''})`;
+            coreList.createEl('li', { text: label });
         });
 
-        schemaInfo.createEl('p', { text: 'Optional fields:' });
-        const optionalList = schemaInfo.createEl('ul');
-        ['priority (enum)', 'due_date (date)', 'tags (array)', 'dependencies (array)', 'completed_date (date)'].forEach(field => {
-            optionalList.createEl('li', { text: field });
+        // Custom schema fields section
+        containerEl.createEl('h4', { text: 'Custom Schema Fields' });
+        const customFieldsContainer = containerEl.createDiv('custom-fields-container');
+        this.renderCustomFields(customFieldsContainer);
+
+        // Add new field button
+        new Setting(containerEl)
+            .setName('Add new schema field')
+            .setDesc('Create a new custom field for atomic tasks')
+            .addButton(button => button
+                .setButtonText('Add field')
+                .onClick(() => {
+                    new CustomFieldModal(this.app, this.plugin, (field) => {
+                        this.plugin.settings.customSchemaFields.push(field);
+                        this.plugin.saveSettings();
+                        this.renderCustomFields(customFieldsContainer);
+                    }).open();
+                })
+            );
+    }
+
+    private renderCustomFields(container: HTMLElement): void {
+        container.empty();
+
+        if (this.plugin.settings.customSchemaFields.length === 0) {
+            container.createEl('p', {
+                text: 'No custom fields configured. Click "Add field" to create your first custom schema field.',
+                cls: 'setting-item-description'
+            });
+            return;
+        }
+
+        this.plugin.settings.customSchemaFields.forEach((field, index) => {
+            const fieldContainer = container.createDiv('custom-field-item');
+
+            // Field header with name and type
+            const fieldHeader = fieldContainer.createDiv('custom-field-header');
+            fieldHeader.createEl('strong', { text: field.displayName || field.key });
+            fieldHeader.createEl('span', {
+                text: ` (${field.key}: ${field.type}${field.required ? ', required' : ''})`,
+                cls: 'custom-field-meta'
+            });
+
+            // Field description
+            if (field.description) {
+                fieldContainer.createEl('p', {
+                    text: field.description,
+                    cls: 'custom-field-description'
+                });
+            }
+
+            // Field actions
+            const fieldActions = fieldContainer.createDiv('custom-field-actions');
+
+            // Edit button
+            fieldActions.createEl('button', { text: 'Edit' })
+                .addEventListener('click', () => {
+                    new CustomFieldModal(this.app, this.plugin, (editedField) => {
+                        this.plugin.settings.customSchemaFields[index] = editedField;
+                        this.plugin.saveSettings();
+                        this.renderCustomFields(container);
+                    }, field).open();
+                });
+
+            // Delete button
+            fieldActions.createEl('button', { text: 'Delete', cls: 'mod-warning' })
+                .addEventListener('click', () => {
+                    if (confirm(`Are you sure you want to delete the field "${field.displayName || field.key}"?`)) {
+                        this.plugin.settings.customSchemaFields.splice(index, 1);
+                        this.plugin.saveSettings();
+                        this.renderCustomFields(container);
+                    }
+                });
         });
+    }
+}
+
+class CustomFieldModal extends Modal {
+    private field: CustomSchemaField;
+    private onSave: (field: CustomSchemaField) => void;
+    private plugin: TaskSystemPlugin;
+
+    constructor(
+        app: App,
+        plugin: TaskSystemPlugin,
+        onSave: (field: CustomSchemaField) => void,
+        existingField?: CustomSchemaField
+    ) {
+        super(app);
+        this.plugin = plugin;
+        this.onSave = onSave;
+        this.field = existingField ? { ...existingField } : {
+            id: `field_${Date.now()}`,
+            displayName: '',
+            key: '',
+            type: 'text',
+            required: false
+        };
+    }
+
+    onOpen() {
+        const { contentEl } = this;
+        contentEl.empty();
+
+        contentEl.createEl('h2', { text: this.field.id.startsWith('field_') ? 'Add Custom Field' : 'Edit Custom Field' });
+
+        // Display Name
+        new Setting(contentEl)
+            .setName('Display Name')
+            .setDesc('Human-readable name shown in UI')
+            .addText(text => text
+                .setPlaceholder('e.g., Project Phase')
+                .setValue(this.field.displayName)
+                .onChange(value => {
+                    this.field.displayName = value;
+                    // Auto-generate key if it's empty or matches the old display name
+                    if (!this.field.key || this.field.key === this.field.displayName.toLowerCase().replace(/\s+/g, '_')) {
+                        this.field.key = value.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+                        keyInput.setValue(this.field.key);
+                    }
+                })
+            );
+
+        // Frontmatter Key
+        let keyInput: TextComponent;
+        new Setting(contentEl)
+            .setName('Frontmatter Key')
+            .setDesc('The key used in frontmatter (lowercase, underscores allowed)')
+            .addText(text => {
+                keyInput = text;
+                return text
+                    .setPlaceholder('e.g., project_phase')
+                    .setValue(this.field.key)
+                    .onChange(value => {
+                        this.field.key = value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+                        text.setValue(this.field.key);
+                    });
+            });
+
+        // Field Type
+        new Setting(contentEl)
+            .setName('Field Type')
+            .setDesc('Data type for this field')
+            .addDropdown(dropdown => dropdown
+                .addOptions({
+                    'text': 'Text',
+                    'number': 'Number',
+                    'date': 'Date',
+                    'boolean': 'Boolean',
+                    'list': 'List',
+                    'enum': 'Enum (predefined values)'
+                })
+                .setValue(this.field.type)
+                .onChange(value => {
+                    this.field.type = value as any;
+                    this.updateEnumValuesVisibility();
+                })
+            );
+
+        // Required toggle
+        new Setting(contentEl)
+            .setName('Required')
+            .setDesc('Whether this field is required for all atomic tasks')
+            .addToggle(toggle => toggle
+                .setValue(this.field.required)
+                .onChange(value => {
+                    this.field.required = value;
+                })
+            );
+
+        // Default Value
+        new Setting(contentEl)
+            .setName('Default Value')
+            .setDesc('Default value when auto-populating (optional)')
+            .addText(text => text
+                .setPlaceholder('Leave empty for no default')
+                .setValue(this.field.defaultValue || '')
+                .onChange(value => {
+                    this.field.defaultValue = value || undefined;
+                })
+            );
+
+        // Enum Values (shown only for enum type)
+        const enumContainer = contentEl.createDiv('enum-values-container');
+        this.updateEnumValuesVisibility();
+
+        // Description
+        new Setting(contentEl)
+            .setName('Description')
+            .setDesc('Optional description of this field')
+            .addTextArea(text => text
+                .setPlaceholder('e.g., The current phase of the project')
+                .setValue(this.field.description || '')
+                .onChange(value => {
+                    this.field.description = value || undefined;
+                })
+            );
+
+        // Action buttons
+        const buttonContainer = contentEl.createDiv('modal-button-container');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'flex-end';
+        buttonContainer.style.gap = '10px';
+        buttonContainer.style.marginTop = '20px';
+
+        const cancelButton = buttonContainer.createEl('button', { text: 'Cancel' });
+        cancelButton.addEventListener('click', () => this.close());
+
+        const saveButton = buttonContainer.createEl('button', { text: 'Save', cls: 'mod-cta' });
+        saveButton.addEventListener('click', () => {
+            if (this.validateField()) {
+                this.onSave(this.field);
+                this.close();
+            }
+        });
+    }
+
+    private updateEnumValuesVisibility() {
+        const enumContainer = this.contentEl.querySelector('.enum-values-container') as HTMLElement;
+        if (!enumContainer) return;
+
+        enumContainer.empty();
+
+        if (this.field.type === 'enum') {
+            enumContainer.createEl('h4', { text: 'Enum Values' });
+            enumContainer.createEl('p', {
+                text: 'Enter the allowed values for this enum field (one per line):',
+                cls: 'setting-item-description'
+            });
+
+            const textarea = enumContainer.createEl('textarea', {
+                placeholder: 'e.g.:\nplanning\nin-progress\ncompleted\nstalled'
+            });
+            textarea.style.width = '100%';
+            textarea.style.minHeight = '100px';
+            textarea.value = (this.field.enumValues || []).join('\n');
+
+            textarea.addEventListener('input', () => {
+                const values = textarea.value
+                    .split('\n')
+                    .map(v => v.trim())
+                    .filter(v => v.length > 0);
+                this.field.enumValues = values.length > 0 ? values : undefined;
+            });
+        }
+    }
+
+    private validateField(): boolean {
+        if (!this.field.displayName.trim()) {
+            alert('Display Name is required');
+            return false;
+        }
+
+        if (!this.field.key.trim()) {
+            alert('Frontmatter Key is required');
+            return false;
+        }
+
+        // Check for duplicate keys
+        const existingField = this.plugin.settings.customSchemaFields.find(
+            f => f.key === this.field.key && f.id !== this.field.id
+        );
+        if (existingField) {
+            alert(`A field with key "${this.field.key}" already exists`);
+            return false;
+        }
+
+        // Check that key doesn't conflict with core fields
+        const coreKeys = CORE_SCHEMA_FIELDS.map(f => f.name);
+        if (coreKeys.includes(this.field.key)) {
+            alert(`The key "${this.field.key}" is reserved for core fields`);
+            return false;
+        }
+
+        if (this.field.type === 'enum' && (!this.field.enumValues || this.field.enumValues.length === 0)) {
+            alert('Enum fields must have at least one allowed value');
+            return false;
+        }
+
+        return true;
+    }
+
+    onClose() {
+        const { contentEl } = this;
+        contentEl.empty();
     }
 }

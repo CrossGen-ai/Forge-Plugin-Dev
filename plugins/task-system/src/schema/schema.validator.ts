@@ -1,4 +1,5 @@
-import { REQUIRED_FIELDS, VALID_STATUS_VALUES, VALID_PRIORITY_VALUES } from './schema.definition';
+import { getCombinedSchemaFields, getRequiredFields, CORE_REQUIRED_FIELDS, VALID_STATUS_VALUES, VALID_PRIORITY_VALUES } from './schema.definition';
+import type { CustomSchemaField } from '../settings/settings.interface';
 import { DateUtils } from '../utils/date.utils';
 
 export interface ValidationResult {
@@ -20,7 +21,10 @@ export interface ValidationWarning {
 }
 
 export class SchemaValidator {
-    static validate(frontmatter: Record<string, any>): ValidationResult {
+    /**
+     * Validate frontmatter against dynamic schema
+     */
+    static validate(frontmatter: Record<string, any>, customFields: CustomSchemaField[] = []): ValidationResult {
         const result: ValidationResult = {
             isValid: true,
             errors: [],
@@ -32,8 +36,12 @@ export class SchemaValidator {
             return result; // Not an atomic note, no validation needed
         }
 
+        // Get combined schema fields
+        const schemaFields = getCombinedSchemaFields(customFields);
+        const requiredFields = getRequiredFields(customFields);
+
         // Check required fields
-        for (const field of REQUIRED_FIELDS) {
+        for (const field of requiredFields) {
             if (!frontmatter.hasOwnProperty(field) ||
                 frontmatter[field] === null ||
                 frontmatter[field] === undefined ||
@@ -47,97 +55,116 @@ export class SchemaValidator {
             }
         }
 
-        // Validate field types and values
-        this.validateFieldTypes(frontmatter, result);
-        this.validateDateFields(frontmatter, result);
-        this.validateEnumFields(frontmatter, result);
+        // Validate each field according to its schema definition
+        this.validateSchemaFields(frontmatter, schemaFields, result);
         this.validateLogicalRules(frontmatter, result);
 
         return result;
     }
 
-    private static validateFieldTypes(frontmatter: Record<string, any>, result: ValidationResult): void {
-        // Validate atomic-task is boolean
-        if (frontmatter['atomic-task'] !== undefined && typeof frontmatter['atomic-task'] !== 'boolean') {
-            result.errors.push({
-                field: 'atomic-task',
-                message: 'atomic-task must be a boolean (true or false)',
-                severity: 'error'
-            });
-            result.isValid = false;
-        }
+    /**
+     * Validate each field according to its schema definition
+     */
+    private static validateSchemaFields(
+        frontmatter: Record<string, any>,
+        schemaFields: Array<{ name: string; type: string; enumValues?: string[] }>,
+        result: ValidationResult
+    ): void {
+        for (const field of schemaFields) {
+            const value = frontmatter[field.name];
 
-        // Validate title is string
-        if (frontmatter.title !== undefined && typeof frontmatter.title !== 'string') {
-            result.errors.push({
-                field: 'title',
-                message: 'title must be a string',
-                severity: 'error'
-            });
-            result.isValid = false;
-        }
+            // Skip validation if field is not present (already handled by required field check)
+            if (value === undefined || value === null) {
+                continue;
+            }
 
-        // Validate arrays
-        if (frontmatter.tags !== undefined && !Array.isArray(frontmatter.tags)) {
-            result.errors.push({
-                field: 'tags',
-                message: 'tags must be an array',
-                severity: 'error'
-            });
-            result.isValid = false;
-        }
-
-        if (frontmatter.dependencies !== undefined && !Array.isArray(frontmatter.dependencies)) {
-            result.errors.push({
-                field: 'dependencies',
-                message: 'dependencies must be an array',
-                severity: 'error'
-            });
-            result.isValid = false;
+            this.validateFieldType(field.name, value, field.type, field.enumValues, result);
         }
     }
 
-    private static validateDateFields(frontmatter: Record<string, any>, result: ValidationResult): void {
-        const dateFields = ['created_date', 'due_date', 'completed_date'];
-
-        for (const field of dateFields) {
-            if (frontmatter[field] !== undefined && frontmatter[field] !== '') {
-                // Check if it's a Date object (which should be converted) or invalid string
-                if (frontmatter[field] instanceof Date) {
-                    // This is a Date object, which means YAML parsing converted it
-                    // We should accept this but it will be normalized later
-                    continue;
-                } else if (typeof frontmatter[field] === 'string' && !DateUtils.isValidDateString(frontmatter[field])) {
+    /**
+     * Validate a single field's type and value
+     */
+    private static validateFieldType(
+        fieldName: string,
+        value: any,
+        fieldType: string,
+        enumValues: string[] | undefined,
+        result: ValidationResult
+    ): void {
+        switch (fieldType) {
+            case 'boolean':
+                if (typeof value !== 'boolean') {
                     result.errors.push({
-                        field,
-                        message: `${field} must be a valid date in YYYY-MM-DD format`,
+                        field: fieldName,
+                        message: `${fieldName} must be a boolean (true or false)`,
                         severity: 'error'
                     });
                     result.isValid = false;
                 }
-            }
-        }
-    }
+                break;
 
-    private static validateEnumFields(frontmatter: Record<string, any>, result: ValidationResult): void {
-        // Validate status
-        if (frontmatter.status !== undefined && !VALID_STATUS_VALUES.includes(frontmatter.status)) {
-            result.errors.push({
-                field: 'status',
-                message: `status must be one of: ${VALID_STATUS_VALUES.join(', ')}`,
-                severity: 'error'
-            });
-            result.isValid = false;
-        }
+            case 'string':
+            case 'text':
+                if (typeof value !== 'string') {
+                    result.errors.push({
+                        field: fieldName,
+                        message: `${fieldName} must be a string`,
+                        severity: 'error'
+                    });
+                    result.isValid = false;
+                }
+                break;
 
-        // Validate priority
-        if (frontmatter.priority !== undefined && frontmatter.priority !== '' && !VALID_PRIORITY_VALUES.includes(frontmatter.priority)) {
-            result.errors.push({
-                field: 'priority',
-                message: `priority must be one of: ${VALID_PRIORITY_VALUES.join(', ')}`,
-                severity: 'error'
-            });
-            result.isValid = false;
+            case 'number':
+                if (typeof value !== 'number' && !isNaN(Number(value))) {
+                    result.errors.push({
+                        field: fieldName,
+                        message: `${fieldName} must be a number`,
+                        severity: 'error'
+                    });
+                    result.isValid = false;
+                }
+                break;
+
+            case 'date':
+                // Check if it's a Date object (which should be converted) or invalid string
+                if (value instanceof Date) {
+                    // This is a Date object, which means YAML parsing converted it
+                    // We should accept this but it will be normalized later
+                    break;
+                } else if (typeof value === 'string' && value !== '' && !DateUtils.isValidDateString(value)) {
+                    result.errors.push({
+                        field: fieldName,
+                        message: `${fieldName} must be a valid date in YYYY-MM-DD format`,
+                        severity: 'error'
+                    });
+                    result.isValid = false;
+                }
+                break;
+
+            case 'array':
+            case 'list':
+                if (!Array.isArray(value)) {
+                    result.errors.push({
+                        field: fieldName,
+                        message: `${fieldName} must be an array/list`,
+                        severity: 'error'
+                    });
+                    result.isValid = false;
+                }
+                break;
+
+            case 'enum':
+                if (enumValues && !enumValues.includes(value)) {
+                    result.errors.push({
+                        field: fieldName,
+                        message: `${fieldName} must be one of: ${enumValues.join(', ')}`,
+                        severity: 'error'
+                    });
+                    result.isValid = false;
+                }
+                break;
         }
     }
 

@@ -75,3 +75,139 @@ Atomic Task Schema Enforcer Plugin Styles
     margin-left: 4px;
     font-size: 0.8em;
 }
+
+/* Custom Schema Fields Settings Styling */
+.custom-fields-container {
+    margin: 16px 0;
+}
+
+.custom-field-item {
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s ease;
+}
+
+.custom-field-item:hover {
+    border-color: var(--color-accent);
+}
+
+.custom-field-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.custom-field-header strong {
+    color: var(--text-normal);
+    font-size: 1.1em;
+}
+
+.custom-field-meta {
+    color: var(--text-muted);
+    font-family: var(--font-monospace);
+    font-size: 0.9em;
+    margin-left: 8px;
+}
+
+.custom-field-description {
+    color: var(--text-muted);
+    font-size: 0.95em;
+    margin: 8px 0;
+    line-height: 1.4;
+}
+
+.custom-field-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.custom-field-actions button {
+    padding: 6px 12px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+}
+
+.custom-field-actions button:hover {
+    background: var(--background-modifier-hover);
+    border-color: var(--color-accent);
+}
+
+.custom-field-actions button.mod-warning {
+    color: var(--color-red);
+    border-color: var(--color-red);
+}
+
+.custom-field-actions button.mod-warning:hover {
+    background: var(--color-red);
+    color: var(--text-on-accent);
+}
+
+/* Core fields info styling */
+.core-fields-info {
+    background: var(--background-secondary-alt);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.core-fields-info p {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-normal);
+}
+
+.core-fields-info ul {
+    margin-left: 16px;
+    margin-bottom: 0;
+}
+
+.core-fields-info li {
+    margin-bottom: 4px;
+    font-family: var(--font-monospace);
+    font-size: 0.9em;
+    color: var(--text-muted);
+}
+
+/* Modal styling for custom field editor */
+.modal-button-container {
+    border-top: 1px solid var(--background-modifier-border);
+    padding-top: 16px;
+    margin-top: 20px;
+}
+
+.enum-values-container {
+    margin: 16px 0;
+}
+
+.enum-values-container h4 {
+    color: var(--text-normal);
+    margin-bottom: 8px;
+}
+
+.enum-values-container textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    font-family: var(--font-monospace);
+    font-size: 0.9em;
+    resize: vertical;
+}
+
+.enum-values-container textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
