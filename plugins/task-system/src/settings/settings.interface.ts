@@ -1,4 +1,13 @@
-import { TaskStatus, Priority } from '../schema/schema.definition';
+import { Priority } from '../schema/schema.definition';
+
+export interface StatusConfig {
+    id: string;
+    value: string;
+    label: string;
+    color: string;
+    isCompleted: boolean;
+    order: number;
+}
 
 export interface CustomSchemaField {
     id: string; // Unique identifier for the field
@@ -15,7 +24,8 @@ export interface TaskSystemSettings {
     enableValidation: boolean;
     autoPopulateDefaults: boolean;
     validationMode: 'warn' | 'strict';
-    defaultStatus: TaskStatus;
+    statusConfigs: StatusConfig[];
+    defaultStatus: string;
     defaultPriority: Priority;
     dateFormat: string;
     showSuccessNotifications: boolean;
@@ -70,10 +80,46 @@ export const DEFAULT_CUSTOM_SCHEMA_FIELDS: CustomSchemaField[] = [
     }
 ];
 
+export const DEFAULT_STATUS_CONFIGS: StatusConfig[] = [
+    {
+        id: 'status-1',
+        value: 'todo',
+        label: 'To Do',
+        color: '#ff6b6b',
+        isCompleted: false,
+        order: 1
+    },
+    {
+        id: 'status-2',
+        value: 'in_progress',
+        label: 'In Progress',
+        color: '#4ecdc4',
+        isCompleted: false,
+        order: 2
+    },
+    {
+        id: 'status-3',
+        value: 'blocked',
+        label: 'Blocked',
+        color: '#ffe66d',
+        isCompleted: false,
+        order: 3
+    },
+    {
+        id: 'status-4',
+        value: 'done',
+        label: 'Done',
+        color: '#95e1d3',
+        isCompleted: true,
+        order: 4
+    }
+];
+
 export const DEFAULT_SETTINGS: TaskSystemSettings = {
     enableValidation: true,
     autoPopulateDefaults: true,
     validationMode: 'warn',
+    statusConfigs: DEFAULT_STATUS_CONFIGS,
     defaultStatus: 'todo',
     defaultPriority: 'medium',
     dateFormat: 'YYYY-MM-DD',

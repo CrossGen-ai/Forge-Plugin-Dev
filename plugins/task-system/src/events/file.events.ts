@@ -33,6 +33,7 @@ export class FileEventHandler {
 
     private async onFileCreated(file: TFile): Promise<void> {
         if (!this.isMarkdownFile(file)) return;
+        if (this.isInClaudeFolder(file)) return;
 
         Logger.debug(`File created: ${file.name}`);
 
@@ -46,6 +47,7 @@ export class FileEventHandler {
 
     private async onFileModified(file: TFile): Promise<void> {
         if (!this.isMarkdownFile(file)) return;
+        if (this.isInClaudeFolder(file)) return;
 
         Logger.debug(`File modified: ${file.name}`);
 
@@ -139,11 +141,20 @@ export class FileEventHandler {
         return file.extension === 'md';
     }
 
+    private isInClaudeFolder(file: TFile): boolean {
+        return file.path.includes('/.claude/');
+    }
+
     async validateCurrentFile(): Promise<boolean> {
         const activeFile = this.plugin.app.workspace.getActiveFile();
 
         if (!activeFile || !this.isMarkdownFile(activeFile)) {
             NotificationManager.showErrorMessage('No active markdown file to validate');
+            return false;
+        }
+
+        if (this.isInClaudeFolder(activeFile)) {
+            NotificationManager.showInfoMessage('Files in .claude folders are ignored by the task system');
             return false;
         }
 
@@ -177,6 +188,11 @@ export class FileEventHandler {
 
         if (!activeFile || !this.isMarkdownFile(activeFile)) {
             NotificationManager.showErrorMessage('No active markdown file to convert');
+            return false;
+        }
+
+        if (this.isInClaudeFolder(activeFile)) {
+            NotificationManager.showInfoMessage('Files in .claude folders are ignored by the task system');
             return false;
         }
 
