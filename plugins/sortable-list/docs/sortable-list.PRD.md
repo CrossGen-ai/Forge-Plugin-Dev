@@ -14,6 +14,16 @@ Enable drag‑and‑drop reordering of simple lists **inside a markdown note** b
 
 The plugin renders that block as a draggable list (in Reading mode). When the user reorders items, the plugin **writes the new order back** to the note by updating the code‑block’s contents. Keep implementation tiny and React-based so Claude Code can extend it quickly.
 
+```sortable
+- Item C
+- Item C
+- Item A
+- Item C
+- Item C
+- Item C
+- Item B
+- Item C
+```
 ## Scope (v0.1)
 
 - Reading mode only (no Live Preview editing integration needed for v0.1).
