@@ -16,12 +16,26 @@ The plugin renders that block as a draggable list (in Reading mode). When the us
 
 ```sortable
 - Item C
+- Item B
+- Item C
+- Item A
+- Item C
+- Item C
+```
+
+
+
+```sortable
+- Item C
+- Item C
 - Item C
 - Item A
 - Item C
 - Item C
 - Item C
+- Item C
 - Item B
+- Item C
 - Item C
 ```
 ## Scope (v0.1)
