@@ -11,8 +11,6 @@ export default class SortableCodeblockPlugin extends Plugin {
 
       // Parse lines with optional checkbox tokens
       const rawLines = source.split('\n').filter(l => l.trim().length > 0);
-      console.log('🔍 Parsing source:', { source, rawLines });
-
       const items: Item[] = rawLines.map((line): Item => {
         // Capture bullet, optional checkbox token, and text
         // groups: 1=bullet (incl. leading spaces), 2=checkbox token like "[ ] " or "[x] ", 3=text
@@ -24,31 +22,16 @@ export default class SortableCodeblockPlugin extends Plugin {
           let checkbox: CheckboxState = 'none';
           if (checkboxRaw === ' ') checkbox = 'unchecked';
           else if (checkboxRaw && checkboxRaw.toLowerCase() === 'x') checkbox = 'checked';
-          const item = { bullet, checkbox, text };
-          console.log('✅ Parsed item:', { line, item });
-          return item;
+          return { bullet, checkbox, text };
         }
         // plain line fallback (no bullet)
-        const item: Item = { bullet: '', checkbox: 'none', text: line };
-        console.log('📝 Plain item:', { line, item });
-        return item;
+        return { bullet: '', checkbox: 'none', text: line };
       });
 
-      console.log('📋 Final parsed items:', items);
-
       const writeBack = async (updatedItems: Item[], mutateIndex?: number, mutateCheckbox?: CheckboxState) => {
-        console.log('💾 writeBack called with:', {
-          updatedItems,
-          mutateIndex,
-          mutateCheckbox
-        });
-
         const info = ctx.getSectionInfo(el);
         const tfile = this.app.vault.getAbstractFileByPath(ctx.sourcePath || '') as TFile | null;
-        if (!info || !tfile) {
-          console.log('❌ Missing info or tfile:', { info, tfile });
-          return;
-        }
+        if (!info || !tfile) return;
 
         const current = await this.app.vault.read(tfile);
         const { lineStart, lineEnd } = info;
@@ -56,81 +39,47 @@ export default class SortableCodeblockPlugin extends Plugin {
         const bodyStart = lineStart + 1;  // First line after opening ```sortable
         const bodyEnd = lineEnd - 1;      // Last line before closing ```
 
-        console.log('📄 File info:', {
-          lineStart,
-          lineEnd,
-          bodyStart,
-          bodyEnd,
-          currentLines: lines.length,
-          originalBody: lines.slice(bodyStart, bodyEnd),
-          lineAtStart: lines[lineStart],
-          lineAtEnd: lines[lineEnd],
-          linesBeingReplaced: lines.slice(bodyStart, bodyEnd),
-          actualContentToReplace: lines.slice(bodyStart, bodyEnd).join('\n')
-        });
-
         // If a single checkbox toggle was requested, reflect it in the array copy
         const arr = updatedItems.map((it) => ({ ...it }));
         if (typeof mutateIndex === 'number' && mutateCheckbox) {
           arr[mutateIndex].checkbox = mutateCheckbox;
-          console.log('☑️ Checkbox toggle applied:', arr[mutateIndex]);
         }
 
         const tokenFor = (c: CheckboxState) => c === 'none' ? '' : (c === 'checked' ? '[x] ' : '[ ] ');
         const newBody = arr.map(i => (i.bullet || '- ') + tokenFor(i.checkbox) + i.text).join('\n');
 
-        console.log('📝 Generated new body:', newBody);
+        // Critical: Ensure we replace EXACTLY the same number of lines
+        const originalBodyLines = lines.slice(bodyStart, bodyEnd);
+        const originalLineCount = originalBodyLines.length;
+        const newBodyLines = newBody.split('\n');
 
-        // Ensure we're replacing exactly the right content
-        // lines[bodyStart] through lines[bodyEnd-1] should be replaced with newBody
-        const beforeLines = lines.slice(0, bodyStart);
-        const afterLines = lines.slice(bodyEnd);
+        // CRITICAL FIX: Always maintain the exact same number of lines
+        if (originalLineCount !== newBodyLines.length) {
+          // Adjust newBody to match original line count
+          if (newBodyLines.length > originalLineCount) {
+            // Too many lines - truncate
+            newBodyLines.splice(originalLineCount);
+          } else {
+            // Too few lines - pad with empty lines
+            while (newBodyLines.length < originalLineCount) {
+              newBodyLines.push('');
+            }
+          }
+        }
 
-        console.log('🔧 Reconstruction Details:', {
-          totalLines: lines.length,
-          beforeCount: beforeLines.length,
-          replacingLineRange: `${bodyStart} to ${bodyEnd-1}`,
-          afterCount: afterLines.length,
-          oldLinesCount: bodyEnd - bodyStart,
-          newBodyLines: newBody.split('\n').length,
-          oldContent: lines.slice(bodyStart, bodyEnd).join('\n'),
-          newContent: newBody,
-          reconstructedLength: beforeLines.length + newBody.split('\n').length + afterLines.length,
-          linesMismatch: (newBody.split('\n').length) - (bodyEnd - bodyStart)
-        });
-
-        // Reconstruct the file: before + newBody + after
-        const updatedLines = [
-          ...beforeLines,
-          ...newBody.split('\n'),
-          ...afterLines
-        ];
-
-        const updated = updatedLines.join('\n');
-
-        console.log('📄 Final reconstruction check:', {
-          originalLines: lines.length,
-          updatedLines: updatedLines.length,
-          lineDifference: updatedLines.length - lines.length
-        });
-
-        console.log('📄 File update:', {
-          changed: updated !== current,
-          originalLength: current.length,
-          newLength: updated.length
-        });
+        // Reconstruct with exact line count preservation
+        const updated = [
+          ...lines.slice(0, bodyStart),
+          ...newBodyLines,
+          ...lines.slice(bodyEnd)
+        ].join('\n');
 
         if (updated !== current) {
-          console.log('💾 Writing file...');
           await this.app.vault.modify(tfile, updated);
-          console.log('✅ File written successfully');
-        } else {
-          console.log('ℹ️ No changes detected, skipping write');
         }
       };
 
       const onReorder = async (newOrder: Item[]) => {
-        console.log('🔄 onReorder called with:', newOrder);
         await writeBack(newOrder);
       };
 
