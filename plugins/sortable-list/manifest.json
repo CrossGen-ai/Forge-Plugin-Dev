@@ -1,0 +1,11 @@
+{
+	"id": "sortable-list",
+	"name": "sortable list",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "A new Obsidian plugin: sortable list",
+	"author": "",
+	"authorUrl": "",
+	"fundingUrl": "",
+	"isDesktopOnly": false
+}
