@@ -1,11 +1,10 @@
 {
-	"id": "sortable-list",
-	"name": "sortable list",
-	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "A new Obsidian plugin: sortable list",
-	"author": "",
+	"id": "sortable-codeblock",
+	"name": "Sortable Code Block",
+	"version": "0.1.0",
+	"minAppVersion": "1.6.0",
+	"description": "Drag-and-drop reorder for items inside ```sortable code blocks (React)",
+	"author": "You",
 	"authorUrl": "",
-	"fundingUrl": "",
 	"isDesktopOnly": false
 }

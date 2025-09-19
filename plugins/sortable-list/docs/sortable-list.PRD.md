@@ -108,9 +108,10 @@ obsidian-sortable/
 ├─ tsconfig.json
 ├─ versions.json
 ├─ styles.css
-├─ main.ts
-└─ ui/
-   └─ SortableBlock.tsx
+├─ src
+   └─  main.ts
+     └─ ui/
+	   └─ SortableBlock.tsx
 ```
 
 ---
