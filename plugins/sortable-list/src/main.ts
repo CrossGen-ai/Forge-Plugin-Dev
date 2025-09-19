@@ -91,10 +91,12 @@ export default class SortableCodeblockPlugin extends Plugin {
           beforeCount: beforeLines.length,
           replacingLineRange: `${bodyStart} to ${bodyEnd-1}`,
           afterCount: afterLines.length,
+          oldLinesCount: bodyEnd - bodyStart,
           newBodyLines: newBody.split('\n').length,
           oldContent: lines.slice(bodyStart, bodyEnd).join('\n'),
           newContent: newBody,
-          reconstructedLength: beforeLines.length + newBody.split('\n').length + afterLines.length
+          reconstructedLength: beforeLines.length + newBody.split('\n').length + afterLines.length,
+          linesMismatch: (newBody.split('\n').length) - (bodyEnd - bodyStart)
         });
 
         // Reconstruct the file: before + newBody + after
