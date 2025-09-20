@@ -8,13 +8,13 @@
   "outgoing-link": true,
   "tag-pane": true,
   "footnotes": false,
-  "properties": true,
+  "properties": false,
   "page-preview": true,
   "daily-notes": true,
   "templates": true,
   "note-composer": true,
   "command-palette": true,
-  "slash-command": true,
+  "slash-command": false,
   "editor-status": true,
   "bookmarks": true,
   "markdown-importer": false,
@@ -29,5 +29,5 @@
   "publish": false,
   "sync": true,
   "bases": true,
-  "webviewer": true
+  "webviewer": false
 }
